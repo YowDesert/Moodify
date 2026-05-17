@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "642198949669",
+    "project_id": "moodify-c632b",
+    "storage_bucket": "moodify-c632b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642198949669:android:cd14a602ab319486a6d4cc",
+        "android_client_info": {
+          "package_name": "com.example.moodify_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642198949669-e2ivs86mbe5lmnv5jj6laqu0oa4nig66.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.moodify_app",
+            "certificate_hash": "55620a27d67b519a0e89a2efad809f6771b958c0"
+          }
+        },
+        {
+          "client_id": "642198949669-admr4u125oqjrmehufb7nmmmdacoo673.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6eOUDlvajW4uZdtRLsCYsteMRqXSoB20"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642198949669-admr4u125oqjrmehufb7nmmmdacoo673.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "642198949669-79m1ro6k1mmdbmpia0sso6jr3545ejub.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.moodifyApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
