@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/song.dart';
 import '../services/favorite_service.dart';
 import '../widgets/song_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_favorite_service.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -12,6 +14,8 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
   final FavoriteService _favoriteService = FavoriteService();
+  final FirebaseFavoriteService _firebaseFavoriteService =
+      FirebaseFavoriteService();
 
   late Future<List<Song>> _favoriteSongsFuture;
 
@@ -22,11 +26,23 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   void _loadFavorites() {
-    _favoriteSongsFuture = _favoriteService.getFavoriteSongs();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _favoriteSongsFuture = _favoriteService.getFavoriteSongs();
+    } else {
+      _favoriteSongsFuture = _firebaseFavoriteService.getFavoriteSongs();
+    }
   }
 
   Future<void> _removeSong(Song song) async {
-    await _favoriteService.removeFavoriteSong(song);
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      await _favoriteService.removeFavoriteSong(song);
+    } else {
+      await _firebaseFavoriteService.removeFavoriteSong(song);
+    }
 
     if (!mounted) return;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
+import '../services/sync_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,10 +12,24 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final AuthService _authService = AuthService();
+  final SyncService _syncService = SyncService();
 
   Future<void> _signIn() async {
     try {
-      await _authService.signInWithGoogle();
+      final result = await _authService.signInWithGoogle();
+
+      if (result != null) {
+        await _syncService.syncLocalDataToFirebase();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('登入成功，已同步本機資料到雲端'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
 

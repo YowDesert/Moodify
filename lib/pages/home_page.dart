@@ -9,6 +9,9 @@ import 'profile_page.dart';
 import '../services/favorite_service.dart';
 import '../services/mood_history_service.dart';
 import 'profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_favorite_service.dart';
+import '../services/firebase_mood_history_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,15 +70,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadHomeStats() async {
-    final favorites = await FavoriteService().getFavoriteSongs();
-    final histories = await MoodHistoryService().getMoodRecords();
+    final user = FirebaseAuth.instance.currentUser;
 
-    if (!mounted) return;
+    if (user == null) {
+      final favorites = await FavoriteService().getFavoriteSongs();
+      final histories = await MoodHistoryService().getMoodRecords();
 
-    setState(() {
-      favoriteCount = favorites.length;
-      historyCount = histories.length;
-    });
+      if (!mounted) return;
+
+      setState(() {
+        favoriteCount = favorites.length;
+        historyCount = histories.length;
+      });
+    } else {
+      final favorites = await FirebaseFavoriteService().getFavoriteSongs();
+      final histories = await FirebaseMoodHistoryService().getMoodRecords();
+
+      if (!mounted) return;
+
+      setState(() {
+        favoriteCount = favorites.length;
+        historyCount = histories.length;
+      });
+    }
   }
 
   @override

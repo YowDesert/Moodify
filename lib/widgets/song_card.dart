@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/song.dart';
 import '../services/favorite_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_favorite_service.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
@@ -15,6 +17,9 @@ class SongCard extends StatefulWidget {
 class _SongCardState extends State<SongCard> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FavoriteService _favoriteService = FavoriteService();
+  final FirebaseFavoriteService _firebaseFavoriteService =
+      FirebaseFavoriteService();
+
   bool _isFavorite = false;
   bool _isPlaying = false;
 
@@ -58,20 +63,38 @@ class _SongCardState extends State<SongCard> {
   }
 
   Future<void> _addToFavorite() async {
-    await _favoriteService.addFavoriteSong(widget.song);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (!mounted) return;
+      if (user == null) {
+        await _favoriteService.addFavoriteSong(widget.song);
+      } else {
+        await _firebaseFavoriteService.addFavoriteSong(widget.song);
+      }
 
-    setState(() {
-      _isFavorite = true;
-    });
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('已收藏：${widget.song.trackName}'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      setState(() {
+        _isFavorite = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            user == null
+                ? '已收藏到本機：${widget.song.trackName}'
+                : '已收藏到雲端：${widget.song.trackName}',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('收藏失敗：$e'), behavior: SnackBarBehavior.floating),
+      );
+    }
   }
 
   @override

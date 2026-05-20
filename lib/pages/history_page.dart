@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/mood_history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_mood_history_service.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -9,8 +11,9 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  final FirebaseMoodHistoryService _firebaseHistoryService =
+      FirebaseMoodHistoryService();
   final MoodHistoryService _historyService = MoodHistoryService();
-
   late Future<List<Map<String, dynamic>>> _recordsFuture;
 
   @override
@@ -20,11 +23,23 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _loadRecords() {
-    _recordsFuture = _historyService.getMoodRecords();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _recordsFuture = _historyService.getMoodRecords();
+    } else {
+      _recordsFuture = _firebaseHistoryService.getMoodRecords();
+    }
   }
 
   Future<void> _clearHistory() async {
-    await _historyService.clearHistory();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      await _historyService.clearHistory();
+    } else {
+      await _firebaseHistoryService.clearHistory();
+    }
 
     if (!mounted) return;
 

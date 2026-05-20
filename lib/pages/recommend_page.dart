@@ -4,6 +4,8 @@ import '../models/song.dart';
 import '../services/music_api_service.dart';
 import '../widgets/song_card.dart';
 import '../services/mood_history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_mood_history_service.dart';
 
 class RecommendPage extends StatefulWidget {
   final Mood mood;
@@ -17,9 +19,10 @@ class RecommendPage extends StatefulWidget {
 class _RecommendPageState extends State<RecommendPage> {
   final MusicApiService _musicApiService = MusicApiService();
   final MoodHistoryService _moodHistoryService = MoodHistoryService();
+  final FirebaseMoodHistoryService _firebaseMoodHistoryService =
+      FirebaseMoodHistoryService();
 
   late Future<List<Song>> _songsFuture;
-
   @override
   void initState() {
     super.initState();
@@ -28,7 +31,13 @@ class _RecommendPageState extends State<RecommendPage> {
   }
 
   Future<void> _saveMoodRecord() async {
-    await _moodHistoryService.addMoodRecord(widget.mood);
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      await _moodHistoryService.addMoodRecord(widget.mood);
+    } else {
+      await _firebaseMoodHistoryService.addMoodRecord(widget.mood);
+    }
   }
 
   @override
