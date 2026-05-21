@@ -97,4 +97,21 @@ class FirebaseMoodHistoryService {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
+  Future<void> deleteMoodRecord(Map<String, dynamic> record) async {
+  final ref = _historyRef;
+
+  if (ref == null) {
+    return;
+  }
+
+  final id = record['id'];
+
+  if (id == null || id.toString().isEmpty) {
+    return;
+  }
+
+  await ref.doc(id).delete();
+}
+
 }

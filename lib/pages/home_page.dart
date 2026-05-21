@@ -25,40 +25,15 @@ class _HomePageState extends State<HomePage> {
   int historyCount = 0;
 
   final List<Mood> moods = const [
-    Mood(
-      title: '開心',
-      emoji: '😊',
-      keyword: 'happy pop',
-      color: Color(0xFFFFD166),
-    ),
-    Mood(
-      title: '難過',
-      emoji: '😔',
-      keyword: 'sad piano',
-      color: Color(0xFF8ECAE6),
-    ),
-    Mood(
-      title: '焦慮',
-      emoji: '😰',
-      keyword: 'calm relaxing',
-      color: Color(0xFFA8DADC),
-    ),
-    Mood(
-      title: '疲憊',
-      emoji: '😴',
-      keyword: 'sleep piano',
-      color: Color(0xFFCDB4DB),
-    ),
-    Mood(
-      title: '想專心',
-      emoji: '🎧',
-      keyword: 'lofi study',
-      color: Color(0xFFB7E4C7),
-    ),
+    Mood(title: '開心', emoji: '😊', keyword: 'upbeat', color: Color(0xFFFFD166)),
+    Mood(title: '難過', emoji: '😔', keyword: 'soft', color: Color(0xFF8ECAE6)),
+    Mood(title: '焦慮', emoji: '😰', keyword: 'calm', color: Color(0xFFA8DADC)),
+    Mood(title: '疲憊', emoji: '😴', keyword: 'sleep', color: Color(0xFFCDB4DB)),
+    Mood(title: '想專心', emoji: '🎧', keyword: 'focus', color: Color(0xFFB7E4C7)),
     Mood(
       title: '療癒',
       emoji: '🌿',
-      keyword: 'healing music',
+      keyword: 'healing',
       color: Color(0xFF95D5B2),
     ),
   ];

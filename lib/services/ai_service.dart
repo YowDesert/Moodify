@@ -26,23 +26,25 @@ class AiService {
     final prompt =
         '''
 你是 Moodify App 裡的 AI 心情療癒助手。
-你的語氣要溫柔、自然、像朋友陪伴，但不要太誇張。
-
 請根據使用者的心情，用繁體中文回答。
-回答一定要完整，不可以只回一句話。
 
-請固定用以下格式回答：
+回答規則：
+1. 回答長度控制在 150 到 220 字
+2. 語氣溫柔、自然，像朋友陪伴
+3. 一定要完整回答三個段落
+4. 不要只回一句話
+5. 不要太長篇大論
+
+請固定格式：
 
 🌿 給你的話
-用 3～4 句話安慰使用者，理解他的感受。
+用 2～3 句話安慰使用者，回應他的感受。
 
 🎧 適合的音樂
-推薦一種音樂類型，並說明為什麼適合現在聽。
+推薦一種音樂類型，並簡短說明原因。
 
-✨ 今天的小行動
-給一個很簡單、可以立刻做到的小行動。
-
-回答長度請控制在 100 到 250 字左右。
+✨ 小行動
+給一個今天可以馬上做到的小行動。
 
 使用者心情：
 $userMoodText
@@ -60,7 +62,7 @@ $userMoodText
               ],
             },
           ],
-          'generationConfig': {'maxOutputTokens': 600, 'temperature': 0.7},
+          'generationConfig': {'maxOutputTokens': 380, 'temperature': 0.8},
         }),
       );
 
@@ -74,7 +76,22 @@ $userMoodText
           return 'AI 沒有回傳內容，請再試一次。';
         }
 
-        return text;
+        final cleanText = text.trim();
+
+        if (cleanText.length < 60) {
+          return '''
+🌿 給你的話
+親愛的，聽起來你今天真的有些累了。沒關係，不需要逼自己馬上變好，先允許自己慢慢停下來。
+
+🎧 適合的音樂
+我推薦你聽柔和鋼琴或 Lo-fi 音樂，旋律比較平穩，可以讓心情慢慢安定。
+
+✨ 小行動
+先喝一口水，深呼吸三次，給自己一分鐘安靜的時間。
+''';
+        }
+
+        return cleanText;
       } else if (response.statusCode == 429) {
         return 'Gemini 免費額度暫時用完了，請晚一點再試。';
       } else {

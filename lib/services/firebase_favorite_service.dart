@@ -15,10 +15,7 @@ class FirebaseFavoriteService {
       return null;
     }
 
-    return _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('favorites');
+    return _firestore.collection('users').doc(user.uid).collection('favorites');
   }
 
   Future<void> addFavoriteSong(Song song) async {
@@ -36,6 +33,9 @@ class FirebaseFavoriteService {
       'collectionName': song.collectionName,
       'artworkUrl': song.artworkUrl,
       'previewUrl': song.previewUrl,
+      'moodTitle': song.moodTitle,
+      'moodEmoji': song.moodEmoji,
+      'moodColor': song.moodColor,
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
@@ -58,6 +58,9 @@ class FirebaseFavoriteService {
         collectionName: data['collectionName'] ?? '未知專輯',
         artworkUrl: data['artworkUrl'] ?? '',
         previewUrl: data['previewUrl'] ?? '',
+        moodTitle: data['moodTitle'] ?? '',
+        moodEmoji: data['moodEmoji'] ?? '',
+        moodColor: data['moodColor'] ?? 0xFF95D5B2,
       );
     }).toList();
   }

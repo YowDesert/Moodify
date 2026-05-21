@@ -42,4 +42,18 @@ class MoodHistoryService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_historyKey);
   }
+
+  Future<void> deleteMoodRecord(Map<String, dynamic> targetRecord) async {
+    final prefs = await SharedPreferences.getInstance();
+    final records = await getMoodRecords();
+
+    records.removeWhere((record) {
+      return record['title'] == targetRecord['title'] &&
+          record['emoji'] == targetRecord['emoji'] &&
+          record['date'] == targetRecord['date'] &&
+          record['time'] == targetRecord['time'];
+    });
+
+    await prefs.setString(_historyKey, jsonEncode(records));
+  }
 }
