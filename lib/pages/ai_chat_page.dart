@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../widgets/moodify_bottom_nav_bar.dart';
+
 import '../services/ai_service.dart';
+import 'favorite_page.dart';
+import 'history_page.dart';
+import 'home_page.dart';
+import 'profile_page.dart';
 
 class AiChatPage extends StatefulWidget {
   const AiChatPage({super.key});
@@ -11,447 +16,1098 @@ class AiChatPage extends StatefulWidget {
 
 class _AiChatPageState extends State<AiChatPage> {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
   final AiService _aiService = AiService();
 
-  String _result = '';
   bool _isLoading = false;
+  late List<_ChatMessage> _messages;
 
-  final List<Map<String, String>> quickMoods = const [
-    {'emoji': '😰', 'title': '我很焦慮', 'text': '我今天覺得很焦慮，腦袋一直停不下來，不知道該怎麼放鬆。'},
-    {'emoji': '😴', 'title': '我很累', 'text': '我今天很累，感覺身體和心裡都沒有力氣，想好好休息。'},
-    {'emoji': '😔', 'title': '我有點難過', 'text': '我今天有點難過，心情悶悶的，不太想跟別人說話。'},
-    {'emoji': '🌙', 'title': '我睡不著', 'text': '我最近有點睡不著，躺著的時候會一直想很多事情。'},
-    {'emoji': '🎧', 'title': '我想專心', 'text': '我想讓自己專心一點，但是現在很容易分心，需要一點安定感。'},
-    {'emoji': '🌿', 'title': '我想被療癒', 'text': '我想讓心情慢慢平靜下來，希望可以被溫柔地陪伴一下。'},
+  static const Color bgColor = Color(0xFFFAFBF7);
+  static const Color primaryColor = Color(0xFF4D8B63);
+  static const Color deepGreen = Color(0xFF1F4A34);
+  static const Color textColor = Color(0xFF2A342D);
+  static const Color subTextColor = Color(0xFF7E877F);
+  static const Color cardColor = Color(0xFFFFFEFB);
+
+  final List<_QuickPrompt> quickMoods = const [
+    _QuickPrompt('😰', '焦慮', '我今天有點焦慮，腦袋一直停不下來，想慢慢放鬆一下。'),
+    _QuickPrompt('😴', '疲憊', '我今天有點累，也有點煩，想找一些能讓我慢慢放鬆的音樂。'),
+    _QuickPrompt('😔', '難過', '我今天心情有點低落，不太想說很多話，但想有人陪我一下。'),
+    _QuickPrompt('🎧', '想專心', '我現在很容易分心，想找能讓我穩定下來、專心一點的方法。'),
+    _QuickPrompt('🌿', '想被療癒', '我想要被溫柔陪伴，讓心情慢慢平靜下來。'),
   ];
 
-  Future<void> _askAi() async {
-    final text = _controller.text.trim();
-
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('請先輸入你今天的心情'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _result = '';
-    });
-
-    final reply = await _aiService.getMoodAdvice(text);
-
-    if (!mounted) return;
-
-    setState(() {
-      _result = reply;
-      _isLoading = false;
-    });
-  }
-
-  void _setQuickMood(String text) {
-    setState(() {
-      _controller.text = text;
-    });
-  }
-
-  void _clearInput() {
-    setState(() {
-      _controller.clear();
-      _result = '';
-    });
-  }
-
-  Future<void> _copyResult() async {
-    if (_result.isEmpty) return;
-
-    await Clipboard.setData(ClipboardData(text: _result));
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('已複製 AI 回答'),
-        behavior: SnackBarBehavior.floating,
+  @override
+  void initState() {
+    super.initState();
+    _messages = [
+      _ChatMessage(
+        isUser: false,
+        text: '嗨，我在這裡陪你。\n今天有什麼想聊的嗎？我可以陪你整理情緒，也可以幫你找適合現在心情的音樂。',
+        time: DateTime.now(),
+        actions: const ['3 分鐘呼吸', '安靜鋼琴'],
+        featured: _RecommendationPack.defaultPack().featured,
       ),
-    );
+    ];
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _sendMessage([String? preset]) async {
+    final text = (preset ?? _controller.text).trim();
+    if (text.isEmpty || _isLoading) return;
+
+    final userMessage = _ChatMessage(
+      isUser: true,
+      text: text,
+      time: DateTime.now(),
+    );
+
+    setState(() {
+      _messages.add(userMessage);
+      _controller.clear();
+      _isLoading = true;
+    });
+    _scrollToBottom();
+
+    final reply = await _aiService.getMoodAdvice(text);
+    final pack = _buildRecommendationPack(text);
+
+    if (!mounted) return;
+
+    setState(() {
+      _messages.add(
+        _ChatMessage(
+          isUser: false,
+          text: reply,
+          time: DateTime.now(),
+          actions: pack.actions,
+          featured: pack.featured,
+        ),
+      );
+      _isLoading = false;
+    });
+    _scrollToBottom();
+  }
+
+  void _startConversation() {
+    _focusNode.requestFocus();
+    _scrollToBottom();
+  }
+
+  void _resetConversation() {
+    setState(() {
+      _messages = [
+        _ChatMessage(
+          isUser: false,
+          text: '新的對話開始了。\n你可以直接告訴我現在的心情，我會用對話的方式陪你慢慢整理。',
+          time: DateTime.now(),
+          actions: const ['呼吸一下', '柔和音樂'],
+          featured: _RecommendationPack.defaultPack().featured,
+        ),
+      ];
+      _controller.clear();
+      _isLoading = false;
+    });
+  }
+
+  _RecommendationPack _buildRecommendationPack(String text) {
+    final lower = text.toLowerCase();
+
+    bool hasAny(List<String> keywords) => keywords.any((k) => lower.contains(k));
+
+    if (hasAny(['專心', '分心', 'focus', 'study', '工作', '學習'])) {
+      return const _RecommendationPack(
+        actions: ['番茄鐘 25 分鐘', '專注鋼琴'],
+        featured: _FeaturedRecommendation(
+          title: '穩穩專注下來',
+          description: '用穩定節奏陪你回到當下，減少雜念與干擾。',
+          itemCount: '18 首歌',
+          duration: '50 分鐘',
+          icon: Icons.piano_rounded,
+          accent: Color(0xFFEDE9FF),
+        ),
+      );
+    }
+
+    if (hasAny(['睡', '累', '疲憊', '休息', '晚安'])) {
+      return const _RecommendationPack(
+        actions: ['睡前放鬆', '晚安白噪音'],
+        featured: _FeaturedRecommendation(
+          title: '慢慢放鬆入夜',
+          description: '柔和旋律和安靜節拍，幫助你把今天的疲憊慢慢放下。',
+          itemCount: '16 首歌',
+          duration: '45 分鐘',
+          icon: Icons.nightlight_round,
+          accent: Color(0xFFF2EEFF),
+        ),
+      );
+    }
+
+    if (hasAny(['焦慮', '煩', '緊張', '不安', 'anx'])) {
+      return const _RecommendationPack(
+        actions: ['3 分鐘呼吸', '安靜鋼琴'],
+        featured: _FeaturedRecommendation(
+          title: '慢慢沉靜下來',
+          description: '柔和旋律，陪你放慢腳步，讓心回到平靜。',
+          itemCount: '20 首歌',
+          duration: '60 分鐘',
+          icon: Icons.spa_rounded,
+          accent: Color(0xFFEAF5EB),
+        ),
+      );
+    }
+
+    if (hasAny(['難過', '低落', '傷心', '哭'])) {
+      return const _RecommendationPack(
+        actions: ['溫柔陪伴', '療癒木吉他'],
+        featured: _FeaturedRecommendation(
+          title: '讓情緒被接住',
+          description: '不急著變好，先讓溫柔的聲音陪你待一會。',
+          itemCount: '14 首歌',
+          duration: '42 分鐘',
+          icon: Icons.favorite_outline_rounded,
+          accent: Color(0xFFF9F0F2),
+        ),
+      );
+    }
+
+    return _RecommendationPack.defaultPack();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent + 220,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3FBF6),
-      appBar: AppBar(
-        title: const Text('AI 心情小助手'),
-        backgroundColor: const Color(0xFFF3FBF6),
-        foregroundColor: const Color(0xFF1F5C49),
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _clearInput,
-            icon: const Icon(Icons.refresh_rounded),
+      backgroundColor: bgColor,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFFFEFB),
+              Color(0xFFFAFBF7),
+              Color(0xFFFFFFFF),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 22),
+                    _buildHeroCard(),
+                    const SizedBox(height: 18),
+                    _buildQuickPrompts(),
+                    const SizedBox(height: 16),
+                    ..._buildChatWidgets(),
+                    if (_isLoading) ...[
+                      const SizedBox(height: 8),
+                      _buildTypingBubble(),
+                    ],
+                  ],
+                ),
+              ),
+              _buildComposer(),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.ai),
+    );
+  }
+
+  List<Widget> _buildChatWidgets() {
+    final widgets = <Widget>[];
+
+    for (final message in _messages) {
+      widgets.add(_buildMessageRow(message));
+      widgets.add(const SizedBox(height: 12));
+    }
+
+    return widgets;
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'AI 陪伴',
+                style: TextStyle(
+                  fontSize: 46,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                  color: deepGreen,
+                  letterSpacing: -1.2,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                '跟你的情緒助理聊聊',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: subTextColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: _softShadow(opacity: 0.07, blur: 20, y: 8),
+                border: Border.all(color: Colors.white, width: 1.2),
+              ),
+              child: const Icon(
+                Icons.music_note_rounded,
+                color: primaryColor,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: _resetConversation,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: const Color(0xFFE8E7DE)),
+                ),
+                child: const Text(
+                  '重置',
+                  style: TextStyle(
+                    color: subTextColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFF0F6ED)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white, width: 1.2),
+        boxShadow: _softShadow(opacity: 0.08, blur: 24, y: 10),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -12,
+            bottom: -10,
+            child: Icon(
+              Icons.spa_rounded,
+              size: 118,
+              color: primaryColor.withOpacity(0.10),
+            ),
+          ),
+          Row(
+            children: [
+              _buildBotAvatar(96),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          '在線陪伴中',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: deepGreen,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF87B67A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '有什麼想聊的嗎？\n我會一直在這裡陪著你。',
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.45,
+                        color: subTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    GestureDetector(
+                      onTap: _startConversation,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF679A74), Color(0xFF3F7A55)],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: _softShadow(opacity: 0.12, blur: 16, y: 8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
+                            SizedBox(width: 10),
+                            Text(
+                              '開始對話',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.chevron_right_rounded, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
-        child: Column(
+    );
+  }
+
+  Widget _buildQuickPrompts() {
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: quickMoods.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final item = quickMoods[index];
+          return GestureDetector(
+            onTap: () => _sendMessage(item.text),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: const Color(0xFFE7E7DF), width: 1),
+              ),
+              child: Center(
+                child: Text(
+                  '${item.emoji} ${item.title}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMessageRow(_ChatMessage message) {
+    if (message.isUser) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F6EB),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Text(
+                    message.text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.55,
+                      color: textColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _formatTime(message.time),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: subTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          _buildUserCircle(),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeaderCard(),
-            const SizedBox(height: 24),
-            _buildSectionHeader(
-              title: '快速選擇',
-              subtitle: '不知道怎麼說也沒關係，先選一個接近的狀態',
+            _buildBotAvatar(46),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.96),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white, width: 1.1),
+                  boxShadow: _softShadow(opacity: 0.045, blur: 12, y: 5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.text,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.65,
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _formatTime(message.time),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: subTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 14),
-            _buildQuickMoodGrid(),
-            const SizedBox(height: 24),
-            _buildSectionHeader(title: '今天想說什麼？', subtitle: '寫下你的感受，AI 會陪你整理'),
-            const SizedBox(height: 14),
-            _buildInputCard(),
-            const SizedBox(height: 18),
-            _buildButton(),
-            const SizedBox(height: 22),
-            if (_isLoading) _buildLoadingCard(),
-            if (_result.isNotEmpty) _buildResultCard(),
+          ],
+        ),
+        if (message.actions.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.only(left: 56),
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: message.actions.map(_buildActionChip).toList(),
+            ),
+          ),
+        ],
+        if (message.featured != null) ...[
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.only(left: 0),
+            child: _buildRecommendationCard(message.featured!),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTypingBubble() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildBotAvatar(46),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white, width: 1.1),
+            boxShadow: _softShadow(opacity: 0.04, blur: 12, y: 5),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Dot(),
+              SizedBox(width: 6),
+              _Dot(),
+              SizedBox(width: 6),
+              _Dot(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionChip(String title) {
+    final icon = title.contains('鋼琴')
+        ? Icons.piano_rounded
+        : title.contains('呼吸')
+            ? Icons.spa_rounded
+            : title.contains('白噪音')
+                ? Icons.nights_stay_outlined
+                : Icons.play_arrow_rounded;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF6EF),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFF0E8DB)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: primaryColor, size: 22),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: deepGreen,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendationCard(_FeaturedRecommendation item) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFF2F7F0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white, width: 1.2),
+        boxShadow: _softShadow(opacity: 0.06, blur: 16, y: 6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Text(
+                '為你推薦',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: deepGreen,
+                ),
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.auto_awesome_rounded, color: Color(0xFF9ABE8D), size: 18),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Container(
+                width: 108,
+                height: 108,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    colors: [item.accent.withOpacity(0.95), Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(item.icon, color: primaryColor.withOpacity(0.25), size: 58),
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 30),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: deepGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      item.description,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.55,
+                        color: subTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        const Icon(Icons.music_note_rounded, size: 18, color: primaryColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.itemCount,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: subTextColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Icon(Icons.schedule_rounded, size: 18, color: primaryColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.duration,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: subTextColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 58,
+                height: 58,
+                decoration: const BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComposer() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        border: Border(
+          top: BorderSide(color: const Color(0xFFEAE8DF).withOpacity(0.9)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F8F3),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE8E7DE)),
+              ),
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                minLines: 1,
+                maxLines: 4,
+                textInputAction: TextInputAction.newline,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: '告訴我你現在的心情...',
+                  hintStyle: TextStyle(
+                    color: Color(0xFFA1A69F),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 15,
+                  height: 1.45,
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: _isLoading ? null : () => _sendMessage(),
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: _isLoading
+                      ? [const Color(0xFFB6D1BF), const Color(0xFFB6D1BF)]
+                      : [const Color(0xFF679A74), const Color(0xFF3F7A55)],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: _softShadow(opacity: 0.09, blur: 16, y: 6),
+              ),
+              child: Icon(
+                _isLoading ? Icons.hourglass_top_rounded : Icons.arrow_upward_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBotAvatar(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFEFB), Color(0xFFF0F5EE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: _softShadow(opacity: 0.06, blur: 14, y: 6),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: size * 0.07,
+            child: Icon(Icons.energy_savings_leaf_rounded, color: const Color(0xFF92B083), size: size * 0.22),
+          ),
+          Container(
+            width: size * 0.62,
+            height: size * 0.52,
+            decoration: BoxDecoration(
+              color: const Color(0xFF43755A),
+              borderRadius: BorderRadius.circular(size * 0.24),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: size * 0.07,
+                    height: size * 0.07,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  ),
+                  SizedBox(width: size * 0.12),
+                  Icon(Icons.sentiment_satisfied_alt_rounded, color: Colors.white, size: size * 0.18),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserCircle() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFE8E7DE)),
+      ),
+      child: const Icon(Icons.person_outline_rounded, color: Color(0xFF8D8D85)),
+    );
+  }
+
+  String _formatTime(DateTime time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '今天 $hour:$minute';
+  }
+
+  Widget _buildBottomNavBar(BuildContext context) {
+    return Container(
+      height: 88,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.07),
+            blurRadius: 22,
+            offset: const Offset(0, -6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            _buildNavItem(
+              icon: Icons.home_rounded,
+              label: '首頁',
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                  (_) => false,
+                );
+              },
+            ),
+            _buildNavItem(
+              icon: Icons.favorite_border_rounded,
+              label: '收藏',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FavoritePage()),
+                );
+              },
+            ),
+            _buildNavItem(
+              icon: Icons.smart_toy_rounded,
+              label: 'AI 陪伴',
+              isSelected: true,
+            ),
+            _buildNavItem(
+              icon: Icons.bar_chart_rounded,
+              label: '紀錄',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryPage()),
+                );
+              },
+            ),
+            _buildNavItem(
+              icon: Icons.person_outline_rounded,
+              label: '我的',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeaderCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFB7E4C7), Color(0xFF95D5B2)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.14),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -12,
-            top: -10,
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              size: 105,
-              color: Colors.white.withOpacity(0.22),
-            ),
-          ),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '🌿 讓 AI 陪你整理心情',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF123D30),
-                  letterSpacing: -0.4,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                '你不用馬上變好，只要先把感受說出來。Moodify 會給你一段溫柔建議、適合的音樂方向和一個小行動。',
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.55,
-                  color: Color(0xFF315F50),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader({
-    required String title,
-    required String subtitle,
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    bool isSelected = false,
+    VoidCallback? onTap,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 21,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF1F5C49),
-            letterSpacing: -0.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: const TextStyle(
-            fontSize: 13,
-            height: 1.4,
-            color: Color(0xFF6D8B7D),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickMoodGrid() {
-    return GridView.builder(
-      itemCount: quickMoods.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 2.5,
-      ),
-      itemBuilder: (context, index) {
-        final item = quickMoods[index];
-
-        return GestureDetector(
-          onTap: () => _setQuickMood(item['text']!),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE1F0E8)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2E7D62).withOpacity(0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? primaryColor : const Color(0xFFB0B4AE),
+              size: 26,
             ),
-            child: Row(
-              children: [
-                Text(item['emoji']!, style: const TextStyle(fontSize: 24)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    item['title']!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1F5C49),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildInputCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _controller,
-        maxLines: 6,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          hintText: '例如：我今天很累，覺得有點焦慮，不太想跟人說話...',
-          hintStyle: TextStyle(color: Color(0xFF9AAFA6)),
-        ),
-        style: const TextStyle(
-          fontSize: 16,
-          height: 1.55,
-          color: Color(0xFF1F5C49),
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton() {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 54,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _askAi,
-              icon: const Icon(Icons.auto_awesome_rounded),
-              label: const Text(
-                '讓 AI 陪我一下',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E7D62),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(0xFFB8D8C8),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 54,
-          height: 54,
-          child: OutlinedButton(
-            onPressed: _isLoading ? null : _clearInput,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF2E7D62),
-              side: const BorderSide(color: Color(0xFF2E7D62), width: 1.3),
-              padding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-            ),
-            child: const Icon(Icons.close_rounded),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-      ),
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 23,
-            height: 23,
-            child: CircularProgressIndicator(strokeWidth: 3),
-          ),
-          SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              'AI 正在陪你整理心情...',
+            const SizedBox(height: 4),
+            Text(
+              label,
               style: TextStyle(
-                color: Color(0xFF1F5C49),
-                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                color: isSelected ? primaryColor : const Color(0xFF9CA39C),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: isSelected ? 28 : 0,
+              height: 3,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildResultCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+  List<BoxShadow> _softShadow({
+    double opacity = 0.06,
+    double blur = 16,
+    double y = 8,
+  }) {
+    return [
+      BoxShadow(
+        color: primaryColor.withOpacity(opacity),
+        blurRadius: blur,
+        offset: Offset(0, y),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'AI 給你的回覆',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF1F5C49),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: _copyResult,
-                icon: const Icon(Icons.copy_rounded, color: Color(0xFF2E7D62)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            _result,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.7,
-              color: Color(0xFF1F5C49),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: _isLoading ? null : _askAi,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text(
-                '重新生成',
-                style: TextStyle(fontWeight: FontWeight.w800),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF2E7D62),
-                side: const BorderSide(color: Color(0xFF2E7D62)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          ),
-        ],
+      BoxShadow(
+        color: Colors.black.withOpacity(opacity * 0.18),
+        blurRadius: blur * 0.6,
+        offset: Offset(0, y * 0.4),
+      ),
+    ];
+  }
+}
+
+class _QuickPrompt {
+  final String emoji;
+  final String title;
+  final String text;
+
+  const _QuickPrompt(this.emoji, this.title, this.text);
+}
+
+class _ChatMessage {
+  final bool isUser;
+  final String text;
+  final DateTime time;
+  final List<String> actions;
+  final _FeaturedRecommendation? featured;
+
+  const _ChatMessage({
+    required this.isUser,
+    required this.text,
+    required this.time,
+    this.actions = const [],
+    this.featured,
+  });
+}
+
+class _RecommendationPack {
+  final List<String> actions;
+  final _FeaturedRecommendation featured;
+
+  const _RecommendationPack({required this.actions, required this.featured});
+
+  factory _RecommendationPack.defaultPack() {
+    return const _RecommendationPack(
+      actions: ['3 分鐘呼吸', '安靜鋼琴'],
+      featured: _FeaturedRecommendation(
+        title: '慢慢沉靜下來',
+        description: '柔和旋律，陪你放慢腳步，讓心回到平靜。',
+        itemCount: '20 首歌',
+        duration: '60 分鐘',
+        icon: Icons.spa_rounded,
+        accent: Color(0xFFEAF5EB),
+      ),
+    );
+  }
+}
+
+class _FeaturedRecommendation {
+  final String title;
+  final String description;
+  final String itemCount;
+  final String duration;
+  final IconData icon;
+  final Color accent;
+
+  const _FeaturedRecommendation({
+    required this.title,
+    required this.description,
+    required this.itemCount,
+    required this.duration,
+    required this.icon,
+    required this.accent,
+  });
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: const Color(0xFF97A498).withOpacity(0.75),
+        shape: BoxShape.circle,
       ),
     );
   }

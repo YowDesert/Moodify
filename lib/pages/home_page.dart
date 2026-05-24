@@ -12,6 +12,7 @@ import 'profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_favorite_service.dart';
 import '../services/firebase_mood_history_service.dart';
+import '../widgets/moodify_bottom_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,6 +24,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int favoriteCount = 0;
   int historyCount = 0;
+
+  static const Color bgColor = Color(0xFFF5F5F7);
+  static const Color primaryColor = Color(0xFF2E7D62);
+  static const Color textColor = Color(0xFF1D1D1F);
+  static const Color subTextColor = Color(0xFF6E6E73);
+  static const Color cardColor = Colors.white;
 
   final List<Mood> moods = const [
     Mood(title: '開心', emoji: '😊', keyword: 'upbeat', color: Color(0xFFFFD166)),
@@ -73,41 +80,83 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3FBF6),
-      body: RefreshIndicator(
-        onRefresh: _loadHomeStats,
-        color: const Color(0xFF2E7D62),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFEAF8F0), Color(0xFFF7FCF9), Color(0xFFFFFFFF)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+      backgroundColor: bgColor,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF7FAF8), Color(0xFFF5F5F7), Color(0xFFFFFFFF)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopBar(context),
-                  const SizedBox(height: 24),
-                  _buildHeroSection(),
-                  const SizedBox(height: 26),
-                  _buildSectionHeader(title: '今天的心情', subtitle: '選一個最接近你的狀態'),
-                  const SizedBox(height: 16),
-                  _buildMoodGrid(context),
-                  const SizedBox(height: 26),
-                  _buildDailyCard(),
-                ],
-              ),
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _loadHomeStats,
+            color: primaryColor,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+              children: [
+                _buildTopTitle(),
+                const SizedBox(height: 22),
+                _buildTodaySummaryCard(),
+                const SizedBox(height: 28),
+                _buildGroupTitle('今天的心情'),
+                const SizedBox(height: 10),
+                _buildMoodGrid(context),
+                const SizedBox(height: 28),
+                _buildDailyCard(),
+              ],
             ),
           ),
         ),
       ),
+      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.home),
+    );
+  }
 
-      bottomNavigationBar: _buildBottomNavBar(context),
+  Widget _buildTopTitle() {
+    return Row(
+      children: [
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Moodify',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '讓音樂慢慢照顧你的心情',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: subTextColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE5E5EA), width: 0.6),
+          ),
+          child: const Icon(
+            Icons.music_note_rounded,
+            color: primaryColor,
+            size: 24,
+          ),
+        ),
+      ],
     );
   }
 
@@ -185,49 +234,49 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildTodaySummaryCard() {
     final now = DateTime.now();
     final dateText = '${now.month}/${now.day}';
 
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
-          colors: [Color(0xFFB7E4C7), Color(0xFF95D5B2)],
+          colors: [Color(0xFFFFFFFF), Color(0xFFEFF8F3)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+        border: Border.all(color: Colors.white, width: 1),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.18),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
+            color: const Color(0xFF2E7D62).withOpacity(0.10),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
       child: Stack(
         children: [
           Positioned(
-            right: -18,
-            top: -18,
+            right: -26,
+            top: -28,
             child: Container(
-              width: 105,
-              height: 105,
+              width: 125,
+              height: 125,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
                 shape: BoxShape.circle,
+                color: const Color(0xFFB7E4C7).withOpacity(0.35),
               ),
             ),
           ),
           Positioned(
-            right: 22,
-            bottom: -16,
+            right: 18,
+            bottom: -12,
             child: Icon(
               Icons.spa_rounded,
-              size: 92,
-              color: Colors.white.withOpacity(0.20),
+              size: 86,
+              color: const Color(0xFF2E7D62).withOpacity(0.08),
             ),
           ),
           Column(
@@ -235,54 +284,130 @@ class _HomePageState extends State<HomePage> {
             children: [
               Row(
                 children: [
-                  _heroPill(
-                    icon: Icons.calendar_today_rounded,
-                    text: '今天 $dateText',
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F3EE),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '今天 $dateText',
+                      style: const TextStyle(
+                        color: primaryColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _heroPill(icon: Icons.auto_awesome_rounded, text: 'AI 陪伴'),
+                  const Spacer(),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: primaryColor,
+                      size: 19,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 22),
               const Text(
                 '今天，也要好好聽見自己',
                 style: TextStyle(
-                  color: Color(0xFF123D30),
+                  color: textColor,
                   fontSize: 25,
                   height: 1.25,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -0.4,
+                  letterSpacing: -0.6,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
               const Text(
-                '選擇心情後，Moodify 會推薦音樂、記錄狀態，也可以讓 AI 陪你整理今天的感受。',
+                '選擇現在最接近的心情，Moodify 會推薦適合的音樂，也會幫你記錄下來。',
                 style: TextStyle(
-                  color: Color(0xFF315F50),
+                  color: subTextColor,
                   fontSize: 15,
                   height: 1.5,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  _heroStatCard(
-                    icon: Icons.favorite_rounded,
-                    value: '$favoriteCount',
-                    label: '收藏歌曲',
+              const SizedBox(height: 22),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.75),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFFE5E5EA),
+                    width: 0.6,
                   ),
-                  const SizedBox(width: 10),
-                  _heroStatCard(
-                    icon: Icons.bar_chart_rounded,
-                    value: '$historyCount',
-                    label: '心情紀錄',
-                  ),
-                ],
+                ),
+                child: Row(
+                  children: [
+                    _buildSmallStat(value: '$favoriteCount', label: '收藏'),
+                    _buildVerticalDivider(),
+                    _buildSmallStat(value: '$historyCount', label: '紀錄'),
+                    _buildVerticalDivider(),
+                    _buildSmallStat(value: 'AI', label: '陪伴'),
+                  ],
+                ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSmallStat({required String value, required String label}) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: textColor,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: subTextColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalDivider() {
+    return Container(width: 1, height: 34, color: const Color(0xFFE5E5EA));
+  }
+
+  Widget _buildGroupTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: subTextColor,
+        ),
       ),
     );
   }
@@ -446,9 +571,9 @@ class _HomePageState extends State<HomePage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 1.05,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.25,
       ),
       itemBuilder: (context, index) {
         final mood = moods[index];
@@ -469,53 +594,41 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDailyCard() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _iosCardDecoration(),
       child: Row(
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0F2E8),
-              borderRadius: BorderRadius.circular(18),
+              color: const Color(0xFFE8F3EE),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
               Icons.calendar_month_rounded,
-              color: Color(0xFF2E7D62),
-              size: 28,
+              color: primaryColor,
+              size: 25,
             ),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 14),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '建立你的心情日記',
+                  '心情月曆',
                   style: TextStyle(
-                    color: Color(0xFF1F5C49),
+                    color: textColor,
                     fontSize: 17,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 5),
+                SizedBox(height: 4),
                 Text(
-                  '每天記錄一點點，慢慢看見自己的變化。',
+                  '用月曆查看過去的情緒變化。',
                   style: TextStyle(
-                    color: Color(0xFF6D8B7D),
+                    color: subTextColor,
                     fontSize: 13,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
@@ -524,13 +637,17 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: Color(0xFF95AFA4),
-          ),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFFC7C7CC)),
         ],
       ),
+    );
+  }
+
+  BoxDecoration _iosCardDecoration() {
+    return BoxDecoration(
+      color: cardColor,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: const Color(0xFFE5E5EA), width: 0.6),
     );
   }
 
@@ -619,18 +736,18 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF52B788), Color(0xFF2D6A4F)],
+                    colors: [Color(0xFF66D6A3), Color(0xFF2E7D62)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  border: Border.all(color: Colors.white, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2E7D62).withOpacity(0.26),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      color: Color(0xFF2E7D62).withOpacity(0.28),
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
                     ),
                   ],
+                  border: Border.all(color: Colors.white, width: 4),
                 ),
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,

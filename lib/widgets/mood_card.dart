@@ -7,82 +7,91 @@ class MoodCard extends StatelessWidget {
 
   const MoodCard({super.key, required this.mood, required this.onTap});
 
+  static const Color textColor = Color(0xFF1D1D1F);
+  static const Color subTextColor = Color(0xFF6E6E73);
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(24),
       child: InkWell(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFFE4F2EA), width: 1),
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              colors: [Colors.white, mood.color.withOpacity(0.16)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: Colors.white, width: 1),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2E7D62).withOpacity(0.07),
-                blurRadius: 18,
+                color: mood.color.withOpacity(0.16),
+                blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -18,
-                top: -18,
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: mood.color.withOpacity(0.28),
-                    shape: BoxShape.circle,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -12,
+                  top: -12,
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.55),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: -24,
-                bottom: -24,
-                child: Container(
-                  width: 78,
-                  height: 78,
-                  decoration: BoxDecoration(
-                    color: mood.color.withOpacity(0.14),
-                    shape: BoxShape.circle,
+                Positioned(
+                  right: 10,
+                  bottom: 8,
+                  child: Container(
+                    width: 30,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: mood.color.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(mood.emoji, style: const TextStyle(fontSize: 38)),
+                    Text(mood.emoji, style: const TextStyle(fontSize: 36)),
                     const Spacer(),
                     Text(
                       mood.title,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 19,
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF1F5C49),
-                        letterSpacing: -0.2,
+                        letterSpacing: -0.25,
+                        color: textColor,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 5),
                     Text(
                       _getMoodSubtitle(mood.title),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF7D948A),
+                        color: subTextColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
