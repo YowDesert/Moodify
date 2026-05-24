@@ -49,7 +49,7 @@ class _RecommendPageState extends State<RecommendPage> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('正在重新為你推薦音樂...'),
+        content: Text('正在隨機尋找相似心情歌曲...'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -84,7 +84,7 @@ class _RecommendPageState extends State<RecommendPage> {
             children: [
               _buildMoodHero(),
               const SizedBox(height: 24),
-              _buildSectionHeader(title: '今日主推薦', subtitle: '根據你的心情，先聽這一首'),
+              _buildSectionHeader(title: '隨機主推薦', subtitle: '每次刷新都會找類似心情的新歌'),
               const SizedBox(height: 14),
               _buildMusicSection(),
               const SizedBox(height: 24),
@@ -259,7 +259,7 @@ class _RecommendPageState extends State<RecommendPage> {
 
         if (songs.isEmpty) {
           return _buildErrorCard(
-            message: '找不到適合的歌曲，請稍後再試。',
+            message: '暫時找不到相似心情歌曲，請再刷新一次。',
             onRetry: _refreshSongs,
           );
         }
@@ -280,7 +280,10 @@ class _RecommendPageState extends State<RecommendPage> {
             const SizedBox(height: 14),
             _buildReasonCard(),
             const SizedBox(height: 24),
-            _buildSectionHeader(title: '更多推薦', subtitle: '也許你也會喜歡這些聲音'),
+            _buildSectionHeader(
+              title: '更多相似心情歌曲',
+              subtitle: '混合不同歌手與曲風，避免推薦都一樣',
+            ),
             const SizedBox(height: 14),
             ...otherSongs.map(
               (song) => SongCard(

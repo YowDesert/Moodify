@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/song.dart';
 import '../services/favorite_service.dart';
 import '../services/firebase_favorite_service.dart';
+import '../services/youtube_search_service.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
@@ -30,6 +31,7 @@ class _SongCardState extends State<SongCard> {
   final FavoriteService _favoriteService = FavoriteService();
   final FirebaseFavoriteService _firebaseFavoriteService =
       FirebaseFavoriteService();
+  final YoutubeSearchService _youtubeSearchService = YoutubeSearchService();
 
   bool _isFavorite = false;
   bool _isPlaying = false;
@@ -73,6 +75,42 @@ class _SongCardState extends State<SongCard> {
       setState(() {
         _isPlaying = true;
       });
+    }
+  }
+
+  Future<void> _openOnYoutube() async {
+    try {
+      final opened = await _youtubeSearchService.openSongOnYoutube(widget.song);
+
+      if (!mounted) return;
+
+      if (!opened) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('無法開啟 YouTube 搜尋'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '正在用 YouTube 搜尋：${widget.song.artistName} - ${widget.song.trackName}',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('開啟 YouTube 失敗：$e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -169,6 +207,13 @@ class _SongCardState extends State<SongCard> {
                     : Icons.favorite_border_rounded,
                 isActive: _isFavorite,
                 onTap: _addToFavorite,
+                size: 46,
+              ),
+              const SizedBox(width: 10),
+              _buildActionButton(
+                icon: Icons.smart_display_rounded,
+                isActive: false,
+                onTap: _openOnYoutube,
                 size: 46,
               ),
               const SizedBox(width: 10),
@@ -288,6 +333,13 @@ class _SongCardState extends State<SongCard> {
                     : Icons.favorite_border_rounded,
                 isActive: _isFavorite,
                 onTap: _addToFavorite,
+                size: 38,
+              ),
+              const SizedBox(height: 8),
+              _buildActionButton(
+                icon: Icons.smart_display_rounded,
+                isActive: false,
+                onTap: _openOnYoutube,
                 size: 38,
               ),
               const SizedBox(height: 8),

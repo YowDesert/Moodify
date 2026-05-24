@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/moodify_bottom_nav_bar.dart';
+import 'favorite_page.dart';
+import 'history_page.dart';
+import 'ai_chat_page.dart';
 
 import '../services/auth_service.dart';
 import '../services/sync_service.dart';
@@ -184,8 +187,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 12),
                     _buildHabitCards(),
                     const SizedBox(height: 24),
-                    _buildUpgradeButton(),
-                    const SizedBox(height: 14),
                     user == null ? _buildLoginButton() : _buildLogoutButton(),
                     const SizedBox(height: 26),
                   ],
@@ -303,7 +304,10 @@ class _ProfilePageState extends State<ProfilePage> {
     String? photoUrl,
     required bool showCloudBadge,
   }) {
-    return Container(
+    return InkWell(
+      onTap: showCloudBadge ? _showAccountSheet : _signIn,
+      borderRadius: BorderRadius.circular(34),
+      child: Container(
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
@@ -421,6 +425,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: '收藏',
                       value: isLoadingStats ? '...' : '$favoriteCount',
                       unit: '',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FavoritePage()),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -430,6 +438,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: '連續紀錄',
                       value: isLoadingStats ? '...' : _streakText(),
                       unit: '天',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HistoryPage()),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -439,6 +451,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: '已陪伴',
                       value: isLoadingStats ? '...' : '$historyCount',
                       unit: '次',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AiChatPage()),
+                      ),
                     ),
                   ),
                 ],
@@ -446,6 +462,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
@@ -483,8 +500,12 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     required String value,
     required String unit,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
       // 原本 88 在部分 Android 模擬器上會差幾 px，導致底部 RenderFlex overflow。
       height: 104,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
@@ -544,6 +565,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -577,19 +599,19 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSettingRow(
             icon: Icons.music_note_rounded,
             title: '音樂偏好',
-            onTap: () {},
+            onTap: _showMusicPreferenceSheet,
           ),
           _buildThinDivider(),
           _buildSettingRow(
             icon: Icons.notifications_none_rounded,
             title: '通知提醒',
-            onTap: () {},
+            onTap: _showNotificationSheet,
           ),
           _buildThinDivider(),
           _buildSettingRow(
             icon: Icons.smart_toy_outlined,
             title: 'AI 陪伴設定',
-            onTap: () {},
+            onTap: _showAiCompanionSheet,
           ),
           _buildThinDivider(),
           _buildSettingRow(
@@ -597,7 +619,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? Icons.phone_iphone_rounded
                 : Icons.verified_user_outlined,
             title: '隱私與資料',
-            onTap: () {},
+            onTap: () => _showPrivacySheet(user),
           ),
         ],
       ),
@@ -785,6 +807,168 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAccountSheet() {
+    final user = FirebaseAuth.instance.currentUser;
+    _showInfoSheet(
+      title: '帳號資訊',
+      icon: Icons.person_outline_rounded,
+      children: [
+        _infoLine('名稱', user?.displayName ?? 'User Ai'),
+        _infoLine('Email', user?.email ?? '尚未登入'),
+        const SizedBox(height: 12),
+        _sheetActionButton('重新整理統計', Icons.refresh_rounded, () async {
+          Navigator.pop(context);
+          await _loadStats();
+        }),
+      ],
+    );
+  }
+
+  void _showMusicPreferenceSheet() {
+    _showInfoSheet(
+      title: '音樂偏好',
+      icon: Icons.music_note_rounded,
+      children: [
+        const Text('選擇你平常最想用音樂照顧的心情。', style: TextStyle(color: subTextColor, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: ['開心', '難過', '焦慮', '疲憊', '想專心', '療癒']
+              .map((mood) => ActionChip(
+                    label: Text(mood),
+                    backgroundColor: softGreen,
+                    labelStyle: const TextStyle(color: deepGreen, fontWeight: FontWeight.w800),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('已設定音樂偏好：$mood'), behavior: SnackBarBehavior.floating));
+                    },
+                  ))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  void _showNotificationSheet() {
+    _showInfoSheet(
+      title: '通知提醒',
+      icon: Icons.notifications_none_rounded,
+      children: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          activeColor: primaryColor,
+          title: const Text('睡前放鬆提醒', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('每天晚上提醒你記錄心情'),
+          value: bedtimeRelax,
+          onChanged: (value) {
+            setState(() => bedtimeRelax = value);
+            Navigator.pop(context);
+          },
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          activeColor: primaryColor,
+          title: const Text('晨間音樂提醒', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('早上推薦適合今天的音樂'),
+          value: morningMusic,
+          onChanged: (value) {
+            setState(() => morningMusic = value);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showAiCompanionSheet() {
+    _showInfoSheet(
+      title: 'AI 陪伴設定',
+      icon: Icons.smart_toy_outlined,
+      children: [
+        _infoLine('模式', '溫柔陪伴'),
+        _infoLine('語氣', '像朋友一樣聊天'),
+        const SizedBox(height: 14),
+        _sheetActionButton('打開 AI 聊天', Icons.chat_bubble_outline_rounded, () {
+          Navigator.pop(context);
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AiChatPage()));
+        }),
+      ],
+    );
+  }
+
+  void _showPrivacySheet(User? user) {
+    _showInfoSheet(
+      title: '隱私與資料',
+      icon: user == null ? Icons.phone_iphone_rounded : Icons.verified_user_outlined,
+      children: [
+        _infoLine('儲存位置', user == null ? '本機資料' : 'Firebase 雲端同步'),
+        _infoLine('收藏數', '$favoriteCount 首'),
+        _infoLine('心情紀錄', '$historyCount 筆'),
+        const SizedBox(height: 14),
+        _sheetActionButton('重新整理資料', Icons.refresh_rounded, () async {
+          Navigator.pop(context);
+          await _loadStats();
+        }),
+      ],
+    );
+  }
+
+  void _showInfoSheet({required String title, required IconData icon, required List<Widget> children}) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(22, 18, 22, 26),
+        decoration: const BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Container(width: 42, height: 42, decoration: const BoxDecoration(color: softGreen, shape: BoxShape.circle), child: Icon(icon, color: primaryColor)),
+                const SizedBox(width: 12),
+                Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+              ]),
+              const SizedBox(height: 18),
+              ...children,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoLine(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          SizedBox(width: 86, child: Text(label, style: const TextStyle(color: subTextColor, fontWeight: FontWeight.w700))),
+          Expanded(child: Text(value, style: const TextStyle(color: textColor, fontWeight: FontWeight.w800))),
+        ],
+      ),
+    );
+  }
+
+  Widget _sheetActionButton(String title, IconData icon, VoidCallback onTap) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+        onPressed: onTap,
+        icon: Icon(icon),
+        label: Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
       ),
     );
   }

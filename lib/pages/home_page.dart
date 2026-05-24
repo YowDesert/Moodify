@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import '../models/mood.dart';
 import '../widgets/mood_card.dart';
@@ -8,11 +10,14 @@ import 'history_page.dart';
 import 'profile_page.dart';
 import '../services/favorite_service.dart';
 import '../services/mood_history_service.dart';
-import 'profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_favorite_service.dart';
 import '../services/firebase_mood_history_service.dart';
 import '../widgets/moodify_bottom_nav_bar.dart';
+import '../services/music_api_service.dart';
+import '../models/song.dart';
+import '../widgets/song_card.dart';
+import '../widgets/breathing_exercise_sheet.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,6 +29,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int favoriteCount = 0;
   int historyCount = 0;
+  List<Map<String, dynamic>> moodRecords = const [];
+  List<Song> recommendedSongs = const [];
+  bool isLoadingRecommendations = false;
+  Mood? recommendationMood;
 
   static const Color bgColor = Color(0xFFF5F5F7);
   static const Color primaryColor = Color(0xFF2E7D62);
@@ -63,7 +72,10 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         favoriteCount = favorites.length;
         historyCount = histories.length;
+        moodRecords = histories;
       });
+
+      await _loadHomeRecommendations(histories);
     } else {
       final favorites = await FirebaseFavoriteService().getFavoriteSongs();
       final histories = await FirebaseMoodHistoryService().getMoodRecords();
@@ -73,8 +85,51 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         favoriteCount = favorites.length;
         historyCount = histories.length;
+        moodRecords = histories;
+      });
+
+      await _loadHomeRecommendations(histories);
+    }
+  }
+
+  Future<void> _loadHomeRecommendations(
+    List<Map<String, dynamic>> histories,
+  ) async {
+    final mood = _moodForRecommendation(histories);
+
+    if (!mounted) return;
+    setState(() {
+      isLoadingRecommendations = true;
+      recommendationMood = mood;
+    });
+
+    try {
+      final songs = await MusicApiService().searchSongs(mood.keyword);
+
+      if (!mounted) return;
+      setState(() {
+        recommendedSongs = songs.take(3).toList();
+        isLoadingRecommendations = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        recommendedSongs = const [];
+        isLoadingRecommendations = false;
       });
     }
+  }
+
+  Mood _moodForRecommendation(List<Map<String, dynamic>> histories) {
+    if (histories.isEmpty) {
+      return moods.firstWhere((mood) => mood.keyword == 'healing');
+    }
+
+    final latestTitle = histories.first['title']?.toString() ?? '';
+    return moods.firstWhere(
+      (mood) => mood.title == latestTitle,
+      orElse: () => moods.firstWhere((mood) => mood.keyword == 'healing'),
+    );
   }
 
   @override
@@ -99,18 +154,28 @@ class _HomePageState extends State<HomePage> {
                 _buildTopTitle(),
                 const SizedBox(height: 22),
                 _buildTodaySummaryCard(),
+                const SizedBox(height: 18),
+                _buildCompanionQuoteCard(),
+                const SizedBox(height: 18),
+                _buildQuickActions(context),
                 const SizedBox(height: 28),
                 _buildGroupTitle('今天的心情'),
                 const SizedBox(height: 10),
                 _buildMoodGrid(context),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
+                _buildMoodInsightCard(),
+                const SizedBox(height: 18),
+                _buildHomeRecommendationSection(context),
+                const SizedBox(height: 18),
                 _buildDailyCard(),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.home),
+      bottomNavigationBar: const MoodifyBottomNavBar(
+        currentTab: MoodifyTab.home,
+      ),
     );
   }
 
@@ -398,6 +463,343 @@ class _HomePageState extends State<HomePage> {
     return Container(width: 1, height: 34, color: const Color(0xFFE5E5EA));
   }
 
+  Widget _buildCompanionQuoteCard() {
+    final latestTitle = moodRecords.isEmpty
+        ? null
+        : moodRecords.first['title']?.toString();
+
+    final text = latestTitle == null
+        ? '先不用急著變好，今天只要慢慢聽見自己就夠了。'
+        : '最近你記錄了「$latestTitle」，今天可以讓音樂先陪你把心放鬆一點。';
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE5E5EA), width: 0.6),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E7D62).withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF8F3),
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: primaryColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '今日一句陪伴',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    color: subTextColor,
+                    fontSize: 13.5,
+                    height: 1.45,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildGroupTitle('快速開始'),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionButton(
+                icon: Icons.air_rounded,
+                title: '3 分鐘呼吸',
+                subtitle: '先慢下來',
+                onTap: () => _showBreathingSheet(context),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildQuickActionButton(
+                icon: Icons.chat_bubble_rounded,
+                title: 'AI 陪我聊',
+                subtitle: '說說現在',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AiChatPage()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildQuickActionButton(
+                icon: Icons.shuffle_rounded,
+                title: '隨機推薦',
+                subtitle: '換首歌',
+                onTap: () async {
+                  final mood = moods[Random().nextInt(moods.length)];
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RecommendPage(mood: mood),
+                    ),
+                  );
+                  _loadHomeStats();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionButton({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFE5E5EA), width: 0.6),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F3EE),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: primaryColor, size: 21),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: textColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: subTextColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoodInsightCard() {
+    final topMood = _topMoodInRecentRecords();
+    final latestEmoji = moodRecords.isEmpty
+        ? '🌿'
+        : (moodRecords.first['emoji']?.toString() ?? '🌿');
+    final latestTitle = moodRecords.isEmpty
+        ? '還沒有紀錄'
+        : (moodRecords.first['title']?.toString() ?? '心情');
+
+    final title = topMood == null ? '開始累積你的心情趨勢' : '這週你比較常感到：$topMood';
+    final subtitle = moodRecords.isEmpty
+        ? '記錄幾次之後，這裡會顯示你最近的心情變化。'
+        : '最近一次是 $latestEmoji $latestTitle，Moodify 會依照你的狀態調整推薦。';
+
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HistoryPage()),
+        );
+        _loadHomeStats();
+      },
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFEFF8F3), Color(0xFFFFFFFF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFE5E5EA), width: 0.6),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: const Icon(
+                Icons.insights_rounded,
+                color: primaryColor,
+                size: 25,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: subTextColor,
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFFC7C7CC)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String? _topMoodInRecentRecords() {
+    if (moodRecords.isEmpty) return null;
+
+    final counts = <String, int>{};
+    for (final record in moodRecords.take(12)) {
+      final title = record['title']?.toString();
+      if (title == null || title.isEmpty) continue;
+      counts[title] = (counts[title] ?? 0) + 1;
+    }
+
+    if (counts.isEmpty) return null;
+
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sorted.first.key;
+  }
+
+  void _showBreathingSheet(BuildContext context) {
+    showBreathingExerciseSheet(context);
+  }
+
+  Widget _breathingStep(String number, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE8F3EE),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: subTextColor,
+                    fontSize: 13,
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGroupTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
@@ -592,53 +994,236 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDailyCard() {
+  Widget _buildHomeRecommendationSection(BuildContext context) {
+    final mood =
+        recommendationMood ??
+        moods.firstWhere((item) => item.keyword == 'healing');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '推薦歌曲 ✨',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    moodRecords.isEmpty
+                        ? '先用溫柔的音樂陪你開始今天。'
+                        : '依照最近的 ${mood.emoji} ${mood.title}，幫你挑幾首適合的歌。',
+                    style: const TextStyle(
+                      color: subTextColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RecommendPage(mood: mood)),
+                );
+                _loadHomeStats();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+              ),
+              child: const Text(
+                '看更多',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (isLoadingRecommendations)
+          _buildRecommendationLoadingCard()
+        else if (recommendedSongs.isEmpty)
+          _buildEmptyRecommendationCard(context, mood)
+        else
+          Column(
+            children: recommendedSongs
+                .map(
+                  (song) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SongCard(
+                      song: song,
+                      moodTitle: mood.title,
+                      moodEmoji: mood.emoji,
+                      moodColor: mood.color.value,
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRecommendationLoadingCard() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: _iosCardDecoration(),
-      child: Row(
+      child: const Row(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F3EE),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.calendar_month_rounded,
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
               color: primaryColor,
-              size: 25,
             ),
           ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '心情月曆',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '用月曆查看過去的情緒變化。',
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 13,
-                    height: 1.4,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+          SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              '正在幫你找適合現在心情的歌曲...',
+              style: TextStyle(
+                color: subTextColor,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFFC7C7CC)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyRecommendationCard(BuildContext context, Mood mood) {
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => RecommendPage(mood: mood)),
+        );
+        _loadHomeStats();
+      },
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: _iosCardDecoration(),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F3EE),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.queue_music_rounded,
+                color: primaryColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '還沒抓到推薦歌曲',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '點一下進入完整推薦頁，重新幫你找歌。',
+                    style: TextStyle(
+                      color: subTextColor,
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFFC7C7CC)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyCard() {
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HistoryPage()),
+        );
+        _loadHomeStats();
+      },
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: _iosCardDecoration(),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F3EE),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.calendar_month_rounded,
+                color: primaryColor,
+                size: 25,
+              ),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '心情月曆',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '用月曆查看過去的情緒變化。',
+                    style: TextStyle(
+                      color: subTextColor,
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFFC7C7CC)),
+          ],
+        ),
       ),
     );
   }

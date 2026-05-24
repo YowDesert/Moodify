@@ -32,6 +32,7 @@ class _HistoryPageState extends State<HistoryPage> {
   List<Map<String, dynamic>> _allRecords = [];
 
   int _selectedRange = 0; // 0 = 本週, 1 = 本月
+  int _weekOffset = 0;
   DateTime _selectedDay = DateTime.now();
 
   @override
@@ -445,19 +446,22 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.86),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: lineColor),
-              ),
-              child: const Text(
-                '查看完整日曆',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+            GestureDetector(
+              onTap: _showFullCalendarSheet,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.86),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: lineColor),
+                ),
+                child: const Text(
+                  '查看完整日曆',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -469,7 +473,10 @@ class _HistoryPageState extends State<HistoryPage> {
           decoration: _iosCardDecoration(radius: 24),
           child: Row(
             children: [
-              const Icon(Icons.chevron_left_rounded, color: subTextColor),
+              IconButton(
+                onPressed: () => setState(() => _weekOffset--),
+                icon: const Icon(Icons.chevron_left_rounded, color: subTextColor),
+              ),
               ...days.map((day) {
                 final selected = _isSameDate(day, _selectedDay);
                 final today = _isSameDate(day, DateTime.now());
@@ -527,7 +534,10 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                 );
               }),
-              const Icon(Icons.chevron_right_rounded, color: subTextColor),
+              IconButton(
+                onPressed: () => setState(() => _weekOffset++),
+                icon: const Icon(Icons.chevron_right_rounded, color: subTextColor),
+              ),
             ],
           ),
         ),
@@ -622,7 +632,9 @@ class _HistoryPageState extends State<HistoryPage> {
     final keyword = record['keyword'] ?? '';
     final color = _moodColor(record);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _showRecordDetail(record),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
       decoration: _iosCardDecoration(radius: 22),
@@ -720,6 +732,7 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -772,10 +785,136 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
+  void _showFullCalendarSheet() {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, 1);
+    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+    final blankDays = firstDay.weekday % 7;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+          decoration: const BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_month_rounded, color: primaryColor),
+                    const SizedBox(width: 10),
+                    Text('${now.month} 月心情日曆', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+                    const Spacer(),
+                    IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: blankDays + daysInMonth,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisSpacing: 8, crossAxisSpacing: 8),
+                  itemBuilder: (context, index) {
+                    if (index < blankDays) return const SizedBox.shrink();
+                    final day = DateTime(now.year, now.month, index - blankDays + 1);
+                    final record = _firstRecordForDay(day);
+                    final selected = _isSameDate(day, _selectedDay);
+                    return InkWell(
+                      onTap: () {
+                        setState(() => _selectedDay = day);
+                        Navigator.pop(context);
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: selected ? primaryColor : softGreen.withOpacity(0.55),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('${day.day}', style: TextStyle(color: selected ? Colors.white : textColor, fontWeight: FontWeight.w900)),
+                            const SizedBox(height: 2),
+                            Text(record?['emoji'] ?? '—', style: const TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRecordDetail(Map<String, dynamic> record) {
+    final title = record['title'] ?? '未知心情';
+    final emoji = record['emoji'] ?? '🌿';
+    final date = record['date'] ?? '';
+    final time = record['time'] ?? '';
+    final keyword = record['keyword'] ?? '';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
+        decoration: const BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Text(emoji, style: const TextStyle(fontSize: 42)),
+                const SizedBox(width: 14),
+                Expanded(child: Text(title.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textColor))),
+              ]),
+              const SizedBox(height: 16),
+              Text('$date  $time', style: const TextStyle(fontSize: 15, color: subTextColor, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              Text(keyword.toString().trim().isEmpty ? '今天的心情是$title，記得溫柔照顧自己。' : keyword.toString(), style: const TextStyle(fontSize: 17, height: 1.5, color: textColor, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _deleteRecord(record);
+                  },
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: const Text('刪除這筆紀錄', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   List<DateTime> _weekDays() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final monday = today.subtract(Duration(days: today.weekday - 1));
+    final monday = today.subtract(Duration(days: today.weekday - 1)).add(Duration(days: _weekOffset * 7));
     return List.generate(7, (index) => monday.add(Duration(days: index)));
   }
 

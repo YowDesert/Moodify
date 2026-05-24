@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import '../widgets/moodify_bottom_nav_bar.dart';
 
 import '../services/ai_service.dart';
+import '../models/mood.dart';
+import '../widgets/breathing_exercise_sheet.dart';
+import 'recommend_page.dart';
 import 'favorite_page.dart';
 import 'history_page.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
+
+
 
 class AiChatPage extends StatefulWidget {
   const AiChatPage({super.key});
@@ -77,8 +82,11 @@ class _AiChatPageState extends State<AiChatPage> {
     });
     _scrollToBottom();
 
-    final reply = await _aiService.getMoodAdvice(text);
-    final pack = _buildRecommendationPack(text);
+    final aiResult = await _aiService.getMoodChat(
+      text,
+      recentMessages: _conversationContext(),
+    );
+    final pack = _RecommendationPack.fromAiResult(aiResult);
 
     if (!mounted) return;
 
@@ -86,7 +94,7 @@ class _AiChatPageState extends State<AiChatPage> {
       _messages.add(
         _ChatMessage(
           isUser: false,
-          text: reply,
+          text: aiResult.reply,
           time: DateTime.now(),
           actions: pack.actions,
           featured: pack.featured,
@@ -118,10 +126,25 @@ class _AiChatPageState extends State<AiChatPage> {
     });
   }
 
+  List<String> _conversationContext() {
+    return _messages
+        .where((message) => message.text.trim().isNotEmpty)
+        .toList()
+        .reversed
+        .take(6)
+        .toList()
+        .reversed
+        .map(
+          (message) => '${message.isUser ? '使用者' : 'Moodify'}：${message.text}',
+        )
+        .toList();
+  }
+
   _RecommendationPack _buildRecommendationPack(String text) {
     final lower = text.toLowerCase();
 
-    bool hasAny(List<String> keywords) => keywords.any((k) => lower.contains(k));
+    bool hasAny(List<String> keywords) =>
+        keywords.any((k) => lower.contains(k));
 
     if (hasAny(['專心', '分心', 'focus', 'study', '工作', '學習'])) {
       return const _RecommendationPack(
@@ -182,6 +205,144 @@ class _AiChatPageState extends State<AiChatPage> {
     return _RecommendationPack.defaultPack();
   }
 
+  Mood _moodForActionTitle(String title) {
+    final lower = title.toLowerCase();
+
+    if (lower.contains('開心') || lower.contains('快樂') || lower.contains('輕快')) {
+      return const Mood(
+        title: '開心',
+        emoji: '😊',
+        keyword: 'upbeat',
+        color: Color(0xFFFFD166),
+      );
+    }
+
+    if (lower.contains('難過') ||
+        lower.contains('溫柔') ||
+        lower.contains('木吉他') ||
+        lower.contains('陪伴')) {
+      return const Mood(
+        title: '難過',
+        emoji: '😔',
+        keyword: 'soft',
+        color: Color(0xFF8ECAE6),
+      );
+    }
+
+    if (lower.contains('焦慮') ||
+        lower.contains('呼吸') ||
+        lower.contains('安靜') ||
+        lower.contains('平靜') ||
+        lower.contains('鋼琴')) {
+      return const Mood(
+        title: '焦慮',
+        emoji: '😰',
+        keyword: 'calm',
+        color: Color(0xFFA8DADC),
+      );
+    }
+
+    if (lower.contains('睡') ||
+        lower.contains('晚安') ||
+        lower.contains('白噪音') ||
+        lower.contains('放鬆')) {
+      return const Mood(
+        title: '疲憊',
+        emoji: '😴',
+        keyword: 'sleep',
+        color: Color(0xFFCDB4DB),
+      );
+    }
+
+    if (lower.contains('專注') ||
+        lower.contains('番茄') ||
+        lower.contains('focus') ||
+        lower.contains('工作') ||
+        lower.contains('讀書')) {
+      return const Mood(
+        title: '想專心',
+        emoji: '🎧',
+        keyword: 'focus',
+        color: Color(0xFFB7E4C7),
+      );
+    }
+
+    return const Mood(
+      title: '療癒',
+      emoji: '🌿',
+      keyword: 'healing',
+      color: Color(0xFF95D5B2),
+    );
+  }
+
+  void _handleActionTap(String title) {
+    final lower = title.toLowerCase();
+
+    if (title.contains('呼吸')) {
+      showBreathingExerciseSheet(context);
+      return;
+    }
+
+    if (title.contains('鋼琴')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const RecommendPage(
+            mood: Mood(
+              title: '安靜鋼琴',
+              emoji: '🎹',
+              keyword: 'solo piano instrumental calm relaxing',
+              color: Color(0xFFEAF5EB),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (title.contains('白噪音')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const RecommendPage(
+            mood: Mood(
+              title: '晚安白噪音',
+              emoji: '🌙',
+              keyword: 'sleep white noise ambient',
+              color: Color(0xFFF2EEFF),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RecommendPage(
+          mood: Mood(
+            title: '療癒',
+            emoji: '🌿',
+            keyword: 'healing calm instrumental',
+            color: Color(0xFFEAF5EB),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openRecommendation(Mood mood) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RecommendPage(mood: mood)),
+    );
+  }
+
+  void _handleFeaturedTap(_FeaturedRecommendation item) {
+    _openRecommendation(_moodForActionTitle(item.title));
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -200,11 +361,7 @@ class _AiChatPageState extends State<AiChatPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFFFFFEFB),
-              Color(0xFFFAFBF7),
-              Color(0xFFFFFFFF),
-            ],
+            colors: [Color(0xFFFFFEFB), Color(0xFFFAFBF7), Color(0xFFFFFFFF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -302,7 +459,10 @@ class _AiChatPageState extends State<AiChatPage> {
             GestureDetector(
               onTap: _resetConversation,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(999),
@@ -391,7 +551,10 @@ class _AiChatPageState extends State<AiChatPage> {
                     GestureDetector(
                       onTap: _startConversation,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFF679A74), Color(0xFF3F7A55)],
@@ -402,7 +565,10 @@ class _AiChatPageState extends State<AiChatPage> {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
+                            Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               '開始對話',
@@ -413,7 +579,10 @@ class _AiChatPageState extends State<AiChatPage> {
                               ),
                             ),
                             SizedBox(width: 8),
-                            Icon(Icons.chevron_right_rounded, color: Colors.white),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.white,
+                            ),
                           ],
                         ),
                       ),
@@ -474,7 +643,10 @@ class _AiChatPageState extends State<AiChatPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F6EB),
                     borderRadius: BorderRadius.circular(24),
@@ -517,7 +689,10 @@ class _AiChatPageState extends State<AiChatPage> {
             const SizedBox(width: 10),
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.96),
                   borderRadius: BorderRadius.circular(24),
@@ -606,165 +781,191 @@ class _AiChatPageState extends State<AiChatPage> {
     final icon = title.contains('鋼琴')
         ? Icons.piano_rounded
         : title.contains('呼吸')
-            ? Icons.spa_rounded
-            : title.contains('白噪音')
-                ? Icons.nights_stay_outlined
-                : Icons.play_arrow_rounded;
+        ? Icons.spa_rounded
+        : title.contains('白噪音')
+        ? Icons.nights_stay_outlined
+        : Icons.play_arrow_rounded;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAF6EF),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFF0E8DB)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: primaryColor, size: 22),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: deepGreen,
+    return InkWell(
+      onTap: () => _handleActionTap(title),
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFAF6EF),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: const Color(0xFFF0E8DB)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: primaryColor, size: 22),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: deepGreen,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 20),
-        ],
+            const SizedBox(width: 8),
+            const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 20),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildRecommendationCard(_FeaturedRecommendation item) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFFFFF), Color(0xFFF2F7F0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: Colors.white, width: 1.2),
-        boxShadow: _softShadow(opacity: 0.06, blur: 16, y: 6),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Text(
-                '為你推薦',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: deepGreen,
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.auto_awesome_rounded, color: Color(0xFF9ABE8D), size: 18),
-            ],
+    return InkWell(
+      onTap: () => _handleFeaturedTap(item),
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFFFFF), Color(0xFFF2F7F0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Container(
-                width: 108,
-                height: 108,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    colors: [item.accent.withOpacity(0.95), Colors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          border: Border.all(color: Colors.white, width: 1.2),
+          boxShadow: _softShadow(opacity: 0.06, blur: 16, y: 6),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Text(
+                  '為你推薦',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: deepGreen,
                   ),
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(item.icon, color: primaryColor.withOpacity(0.25), size: 58),
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 30),
-                    ),
-                  ],
+                SizedBox(width: 8),
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Color(0xFF9ABE8D),
+                  size: 18,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: deepGreen,
-                      ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      colors: [item.accent.withOpacity(0.95), Colors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.55,
-                        color: subTextColor,
-                        fontWeight: FontWeight.w600,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        item.icon,
+                        color: primaryColor.withOpacity(0.25),
+                        size: 54,
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        const Icon(Icons.music_note_rounded, size: 18, color: primaryColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          item.itemCount,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: subTextColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(width: 16),
-                        const Icon(Icons.schedule_rounded, size: 18, color: primaryColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          item.duration,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: subTextColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: primaryColor,
+                          size: 30,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                width: 58,
-                height: 58,
-                decoration: const BoxDecoration(
-                  color: primaryColor,
-                  shape: BoxShape.circle,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: deepGreen,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.description,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.55,
+                          color: subTextColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 14,
+                        runSpacing: 8,
+                        children: [
+                          _recommendMeta(
+                            icon: Icons.music_note_rounded,
+                            text: item.itemCount,
+                          ),
+                          _recommendMeta(
+                            icon: Icons.schedule_rounded,
+                            text: item.duration,
+                          ),
+                          _recommendMeta(
+                            icon: Icons.chevron_right_rounded,
+                            text: '去聽歌',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _recommendMeta({required IconData icon, required String text}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: primaryColor),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13,
+            color: subTextColor,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 
@@ -826,7 +1027,9 @@ class _AiChatPageState extends State<AiChatPage> {
                 boxShadow: _softShadow(opacity: 0.09, blur: 16, y: 6),
               ),
               child: Icon(
-                _isLoading ? Icons.hourglass_top_rounded : Icons.arrow_upward_rounded,
+                _isLoading
+                    ? Icons.hourglass_top_rounded
+                    : Icons.arrow_upward_rounded,
                 color: Colors.white,
                 size: 24,
               ),
@@ -855,7 +1058,11 @@ class _AiChatPageState extends State<AiChatPage> {
         children: [
           Positioned(
             top: size * 0.07,
-            child: Icon(Icons.energy_savings_leaf_rounded, color: const Color(0xFF92B083), size: size * 0.22),
+            child: Icon(
+              Icons.energy_savings_leaf_rounded,
+              color: const Color(0xFF92B083),
+              size: size * 0.22,
+            ),
           ),
           Container(
             width: size * 0.62,
@@ -871,10 +1078,17 @@ class _AiChatPageState extends State<AiChatPage> {
                   Container(
                     width: size * 0.07,
                     height: size * 0.07,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   SizedBox(width: size * 0.12),
-                  Icon(Icons.sentiment_satisfied_alt_rounded, color: Colors.white, size: size * 0.18),
+                  Icon(
+                    Icons.sentiment_satisfied_alt_rounded,
+                    color: Colors.white,
+                    size: size * 0.18,
+                  ),
                 ],
               ),
             ),
@@ -1063,6 +1277,64 @@ class _RecommendationPack {
   final _FeaturedRecommendation featured;
 
   const _RecommendationPack({required this.actions, required this.featured});
+
+  factory _RecommendationPack.fromAiResult(AiChatResult result) {
+    IconData icon;
+    Color accent;
+    String itemCount;
+    String duration;
+
+    switch (result.moodKey) {
+      case 'upbeat':
+        icon = Icons.wb_sunny_rounded;
+        accent = const Color(0xFFFFF3D8);
+        itemCount = '隨機歌曲';
+        duration = '輕快';
+        break;
+      case 'soft':
+        icon = Icons.favorite_outline_rounded;
+        accent = const Color(0xFFF9F0F2);
+        itemCount = '相似心情';
+        duration = '溫柔';
+        break;
+      case 'calm':
+        icon = Icons.spa_rounded;
+        accent = const Color(0xFFEAF5EB);
+        itemCount = '放鬆歌曲';
+        duration = '平靜';
+        break;
+      case 'sleep':
+        icon = Icons.nightlight_round;
+        accent = const Color(0xFFF2EEFF);
+        itemCount = '睡前歌曲';
+        duration = '慢節奏';
+        break;
+      case 'focus':
+        icon = Icons.piano_rounded;
+        accent = const Color(0xFFEDE9FF);
+        itemCount = '專注歌曲';
+        duration = '穩定';
+        break;
+      default:
+        icon = Icons.energy_savings_leaf_rounded;
+        accent = const Color(0xFFEAF5EB);
+        itemCount = '療癒歌曲';
+        duration = '舒服';
+        break;
+    }
+
+    return _RecommendationPack(
+      actions: result.actions,
+      featured: _FeaturedRecommendation(
+        title: result.musicTitle,
+        description: result.musicDescription,
+        itemCount: itemCount,
+        duration: duration,
+        icon: icon,
+        accent: accent,
+      ),
+    );
+  }
 
   factory _RecommendationPack.defaultPack() {
     return const _RecommendationPack(
