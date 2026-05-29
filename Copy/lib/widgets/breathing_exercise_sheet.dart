@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class BreathingExerciseSheet extends StatefulWidget {
-  BreathingExerciseSheet({super.key});
+  const BreathingExerciseSheet({super.key});
 
   @override
   State<BreathingExerciseSheet> createState() => _BreathingExerciseSheetState();
@@ -19,7 +19,7 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
   int _cyclesDone = 0;
   bool _isRunning = true;
 
-  final List<_BreathingMode> _modes = [
+  final List<_BreathingMode> _modes = const [
     _BreathingMode(
       title: '焦慮安定',
       subtitle: '吸 4・停 2・吐 6，讓身體慢慢降速',
@@ -78,7 +78,7 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
 
     if (!_isRunning) return;
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!_isRunning) return;
 
       if (_secondsLeft > 1) {
@@ -137,11 +137,11 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
 
   @override
   Widget build(BuildContext context) {
-    final green = const Color(0xFF2F7D5B);
+    const green = Color(0xFF2F7D5B);
 
     return Container(
-      padding: EdgeInsets.fromLTRB(22, 14, 22, 26),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(22, 14, 22, 26),
+      decoration: const BoxDecoration(
         color: Color(0xFFFAFBF7),
         borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
       ),
@@ -154,22 +154,22 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
               Container(
                 width: 44,
                 height: 5,
-                margin: EdgeInsets.only(bottom: 20),
+                margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
               _buildHeader(green),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               _buildModeSelector(green),
-              SizedBox(height: 28),
+              const SizedBox(height: 28),
               _buildBreathingCircle(green),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildPhaseText(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildProgress(green),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               _buildActions(green),
             ],
           ),
@@ -190,12 +190,12 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
           ),
           child: Icon(_currentMode.icon, color: green, size: 28),
         ),
-        SizedBox(width: 14),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 '跟著節奏呼吸',
                 style: TextStyle(
                   fontSize: 23,
@@ -204,13 +204,13 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
                   letterSpacing: -0.4,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               AnimatedSwitcher(
-                duration: Duration(milliseconds: 260),
+                duration: const Duration(milliseconds: 260),
                 child: Text(
                   _currentMode.subtitle,
                   key: ValueKey(_currentMode.subtitle),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13.5,
                     color: Color(0xFF7A827B),
                     height: 1.35,
@@ -231,27 +231,27 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _modes.length,
-        separatorBuilder: (_, __) => SizedBox(width: 9),
+        separatorBuilder: (_, __) => const SizedBox(width: 9),
         itemBuilder: (context, index) {
           final mode = _modes[index];
           final selected = index == _modeIndex;
           return GestureDetector(
             onTap: () => _changeMode(index),
             child: AnimatedContainer(
-              duration: Duration(milliseconds: 220),
-              padding: EdgeInsets.symmetric(horizontal: 14),
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 color: selected ? green : Colors.white,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: selected ? green : Color(0xFFE4ECE5),
+                  color: selected ? green : const Color(0xFFE4ECE5),
                 ),
                 boxShadow: selected
                     ? [
                         BoxShadow(
                           color: green.withOpacity(0.18),
                           blurRadius: 14,
-                          offset: Offset(0, 7),
+                          offset: const Offset(0, 7),
                         ),
                       ]
                     : [],
@@ -259,7 +259,7 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
               child: Row(
                 children: [
                   Icon(mode.icon, size: 17, color: selected ? Colors.white : green),
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
                   Text(
                     mode.title,
                     style: TextStyle(
@@ -309,7 +309,7 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [green.withOpacity(0.22), Color(0xFFB7E4C7).withOpacity(0.38)],
+                        colors: [green.withOpacity(0.22), const Color(0xFFB7E4C7).withOpacity(0.38)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -331,7 +331,7 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
                         ),
                         child: Center(
                           child: AnimatedSwitcher(
-                            duration: Duration(milliseconds: 200),
+                            duration: const Duration(milliseconds: 200),
                             child: Text(
                               '$_secondsLeft',
                               key: ValueKey(_secondsLeft),
@@ -357,24 +357,24 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
 
   Widget _buildPhaseText() {
     return AnimatedSwitcher(
-      duration: Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 320),
       child: Column(
         key: ValueKey('${_modeIndex}_${_phaseIndex}'),
         children: [
           Text(
             _currentPhase.title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1F2A24),
               letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             _currentPhase.subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               height: 1.45,
               color: Color(0xFF7A827B),
@@ -401,13 +401,13 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
             valueColor: AlwaysStoppedAnimation<Color>(green),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               '完成 $_cyclesDone 輪',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF7A827B),
                 fontSize: 12.5,
                 fontWeight: FontWeight.w800,
@@ -436,16 +436,16 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
             style: OutlinedButton.styleFrom(
               foregroundColor: green,
               side: BorderSide(color: green.withOpacity(0.22)),
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
             ),
             child: Text(
               _isRunning ? '暫停一下' : '繼續呼吸',
-              style: TextStyle(fontWeight: FontWeight.w900),
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
             onPressed: () => Navigator.pop(context),
@@ -453,10 +453,10 @@ class _BreathingExerciseSheetState extends State<BreathingExerciseSheet>
               backgroundColor: green,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
             ),
-            child: Text(
+            child: const Text(
               '我準備好了',
               style: TextStyle(fontWeight: FontWeight.w900),
             ),
@@ -473,7 +473,7 @@ class _BreathingMode {
   final IconData icon;
   final List<_BreathingPhase> phases;
 
-  _BreathingMode({
+  const _BreathingMode({
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -488,7 +488,7 @@ class _BreathingPhase {
   final double fromScale;
   final double toScale;
 
-  _BreathingPhase(
+  const _BreathingPhase(
     this.title,
     this.subtitle,
     this.seconds,
@@ -503,6 +503,6 @@ void showBreathingExerciseSheet(BuildContext context) {
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withOpacity(0.45),
-    builder: (_) => BreathingExerciseSheet(),
+    builder: (_) => const BreathingExerciseSheet(),
   );
 }

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 import 'pages/home_page.dart';
+import 'services/app_theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,16 +21,53 @@ class MoodifyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Moodify',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Huninn',
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7BC6A4)),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF3FBF6),
-      ),
-      home: const HomePage(),
+    return ValueListenableBuilder<MoodifyThemeState>(
+      valueListenable: MoodifyThemeController.instance.notifier,
+      builder: (context, themeState, _) {
+        final colors = moodifyColors(themeState);
+
+        ThemeData buildTheme(Brightness brightness) {
+          final base = brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light();
+          return ThemeData(
+            fontFamily: 'jf-openhuninn',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: colors.primary,
+              brightness: brightness,
+            ),
+            useMaterial3: true,
+            scaffoldBackgroundColor: colors.background,
+            cardColor: colors.card,
+            textTheme: base.textTheme.apply(
+              bodyColor: colors.text,
+              displayColor: colors.text,
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: colors.background,
+              foregroundColor: colors.text,
+              elevation: 0,
+              centerTitle: true,
+            ),
+            snackBarTheme: SnackBarThemeData(
+              backgroundColor: colors.card,
+              contentTextStyle: TextStyle(color: colors.text, fontWeight: FontWeight.w700),
+              behavior: SnackBarBehavior.floating,
+            ),
+            switchTheme: SwitchThemeData(
+              thumbColor: MaterialStateProperty.resolveWith((states) => colors.primary),
+              trackColor: MaterialStateProperty.resolveWith((states) => colors.soft),
+            ),
+          );
+        }
+
+        return MaterialApp(
+          title: 'Moodify',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeState.isDark ? ThemeMode.dark : ThemeMode.light,
+          theme: buildTheme(Brightness.light),
+          darkTheme: buildTheme(Brightness.dark),
+          home: const HomePage(),
+        );
+      },
     );
   }
 }

@@ -32,8 +32,8 @@ class _HomePageState extends State<HomePage> {
   int favoriteCount = 0;
   int historyCount = 0;
 
-  List<Map<String, dynamic>> moodRecords = [];
-  List<Song> recommendedSongs = [];
+  List<Map<String, dynamic>> moodRecords = const [];
+  List<Song> recommendedSongs = const [];
 
   bool isLoadingRecommendations = false;
   bool isLoadingWeather = false;
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   String weatherText = '正在取得台北天氣';
   double? weatherTemperature;
 
-  final List<Mood> moods = [
+  final List<Mood> moods = const [
     Mood(title: '開心', emoji: '😊', keyword: 'upbeat', color: Color(0xFFFFD166)),
     Mood(title: '難過', emoji: '😔', keyword: 'soft', color: Color(0xFF8ECAE6)),
     Mood(title: '焦慮', emoji: '😰', keyword: 'calm', color: Color(0xFFA8DADC)),
@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
 
       setState(() {
-        recommendedSongs = [];
+        recommendedSongs = const [];
         isLoadingRecommendations = false;
       });
     }
@@ -205,31 +205,33 @@ class _HomePageState extends State<HomePage> {
                 color: themeColors.primary,
                 backgroundColor: themeColors.card,
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 120),
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
                   children: [
                     _buildTopTitle(themeColors),
-                    SizedBox(height: 22),
+                    const SizedBox(height: 22),
                     _buildTodaySummaryCard(themeState, themeColors),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
+                    _buildWeatherThemeCard(themeState, themeColors),
+                    const SizedBox(height: 18),
                     _buildCompanionQuoteCard(themeColors),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildQuickActions(context, themeColors),
-                    SizedBox(height: 28),
+                    const SizedBox(height: 28),
                     _buildGroupTitle('今天的心情', themeColors),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildMoodGrid(context),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     _buildMoodInsightCard(themeColors),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildHomeRecommendationSection(context, themeColors),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildDailyCard(themeColors),
                   ],
                 ),
               ),
             ),
           ),
-          bottomNavigationBar: MoodifyBottomNavBar(
+          bottomNavigationBar: const MoodifyBottomNavBar(
             currentTab: MoodifyTab.home,
           ),
         );
@@ -253,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                   color: themeColors.text,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 '讓音樂慢慢照顧你的心情',
                 style: TextStyle(
@@ -276,7 +278,7 @@ class _HomePageState extends State<HomePage> {
               BoxShadow(
                 color: themeColors.primary.withOpacity(0.08),
                 blurRadius: 14,
-                offset: Offset(0, 8),
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -298,7 +300,7 @@ class _HomePageState extends State<HomePage> {
     final dateText = '${now.month}/${now.day}';
 
     return Container(
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
@@ -316,7 +318,7 @@ class _HomePageState extends State<HomePage> {
               themeState.isDark ? 0.14 : 0.10,
             ),
             blurRadius: 28,
-            offset: Offset(0, 14),
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -349,7 +351,7 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 11,
                       vertical: 7,
                     ),
@@ -366,7 +368,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
                     width: 34,
                     height: 34,
@@ -382,7 +384,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 22),
+              const SizedBox(height: 22),
               Text(
                 '今天，也要好好聽見自己',
                 style: TextStyle(
@@ -393,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                   letterSpacing: -0.6,
                 ),
               ),
-              SizedBox(height: 9),
+              const SizedBox(height: 9),
               Text(
                 '選擇現在最接近的心情，Moodify 會推薦適合的音樂，也會幫你記錄下來。',
                 style: TextStyle(
@@ -403,9 +405,9 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 22),
+              const SizedBox(height: 22),
               Container(
-                padding: EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: themeColors.card.withOpacity(
                     themeState.isDark ? 0.68 : 0.78,
@@ -459,7 +461,7 @@ class _HomePageState extends State<HomePage> {
               letterSpacing: -0.3,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -488,7 +490,7 @@ class _HomePageState extends State<HomePage> {
         : '・${weatherTemperature!.toStringAsFixed(0)}°C';
 
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _iosCardDecoration(themeState, themeColors),
       child: Row(
         children: [
@@ -505,7 +507,7 @@ class _HomePageState extends State<HomePage> {
               size: 28,
             ),
           ),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +520,7 @@ class _HomePageState extends State<HomePage> {
                     color: themeColors.text,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   '台北 $weatherText$tempText，${isWeatherMode ? '已自動套用' : '可在「我的」開啟'}',
                   maxLines: 2,
@@ -557,7 +559,7 @@ class _HomePageState extends State<HomePage> {
         : '最近你記錄了「$latestTitle」，今天可以讓音樂先陪你把心放鬆一點。';
 
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _plainCardDecoration(themeColors),
       child: Row(
         children: [
@@ -574,7 +576,7 @@ class _HomePageState extends State<HomePage> {
               size: 24,
             ),
           ),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +589,7 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   text,
                   style: TextStyle(
@@ -613,11 +615,11 @@ class _HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildGroupTitle('快速開始', themeColors),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
           childAspectRatio: 1.5,
@@ -687,7 +689,7 @@ class _HomePageState extends State<HomePage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: _plainCardDecoration(themeColors, radius: 22),
         child: Column(
           children: [
@@ -700,7 +702,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Icon(icon, color: themeColors.primary, size: 21),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               title,
               textAlign: TextAlign.center,
@@ -712,7 +714,7 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: 3),
+            const SizedBox(height: 3),
             Text(
               subtitle,
               textAlign: TextAlign.center,
@@ -734,8 +736,8 @@ class _HomePageState extends State<HomePage> {
     return GridView.builder(
       itemCount: moods.length,
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
@@ -787,7 +789,7 @@ class _HomePageState extends State<HomePage> {
       },
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [themeColors.soft, themeColors.card],
@@ -812,7 +814,7 @@ class _HomePageState extends State<HomePage> {
                 size: 25,
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -825,7 +827,7 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Text(
                     subtitle,
                     style: TextStyle(
@@ -895,7 +897,7 @@ class _HomePageState extends State<HomePage> {
                       letterSpacing: -0.2,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     moodRecords.isEmpty
                         ? '先用溫柔的音樂陪你開始今天。'
@@ -920,16 +922,16 @@ class _HomePageState extends State<HomePage> {
               },
               style: TextButton.styleFrom(
                 foregroundColor: themeColors.primary,
-                padding: EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              child: Text(
+              child: const Text(
                 '看更多',
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         if (isLoadingRecommendations)
           _buildRecommendationLoadingCard(themeColors)
         else if (recommendedSongs.isEmpty)
@@ -939,7 +941,7 @@ class _HomePageState extends State<HomePage> {
             children: recommendedSongs
                 .map(
                   (song) => Padding(
-                    padding: EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 12),
                     child: SongCard(
                       song: song,
                       moodTitle: mood.title,
@@ -957,7 +959,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRecommendationLoadingCard(MoodifyThemeColors themeColors) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _plainCardDecoration(themeColors),
       child: Row(
         children: [
@@ -969,7 +971,7 @@ class _HomePageState extends State<HomePage> {
               color: themeColors.primary,
             ),
           ),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Text(
               '正在幫你找適合現在心情的歌曲...',
@@ -1001,7 +1003,7 @@ class _HomePageState extends State<HomePage> {
       },
       borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: _plainCardDecoration(themeColors),
         child: Row(
           children: [
@@ -1018,7 +1020,7 @@ class _HomePageState extends State<HomePage> {
                 size: 24,
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1031,7 +1033,7 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     '點一下進入完整推薦頁，重新幫你找歌。',
                     style: TextStyle(
@@ -1066,7 +1068,7 @@ class _HomePageState extends State<HomePage> {
       },
       borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: _plainCardDecoration(themeColors),
         child: Row(
           children: [
@@ -1083,7 +1085,7 @@ class _HomePageState extends State<HomePage> {
                 size: 25,
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1096,7 +1098,7 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     '用月曆查看過去的情緒變化。',
                     style: TextStyle(
@@ -1121,7 +1123,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildGroupTitle(String title, MoodifyThemeColors themeColors) {
     return Padding(
-      padding: EdgeInsets.only(left: 4),
+      padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
         style: TextStyle(
@@ -1151,7 +1153,7 @@ class _HomePageState extends State<HomePage> {
             themeState.isDark ? 0.10 : 0.08,
           ),
           blurRadius: 22,
-          offset: Offset(0, 10),
+          offset: const Offset(0, 10),
         ),
       ],
     );
@@ -1169,7 +1171,7 @@ class _HomePageState extends State<HomePage> {
         BoxShadow(
           color: themeColors.primary.withOpacity(0.05),
           blurRadius: 16,
-          offset: Offset(0, 8),
+          offset: const Offset(0, 8),
         ),
       ],
     );

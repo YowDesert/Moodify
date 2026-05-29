@@ -1,7 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/app_theme_controller.dart';
 import '../widgets/moodify_bottom_nav_bar.dart';
 
 import '../models/song.dart';
@@ -22,17 +21,6 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
   final FavoriteService _favoriteService = FavoriteService();
   final FirebaseFavoriteService _firebaseFavoriteService =
       FirebaseFavoriteService();
@@ -45,7 +33,15 @@ class _FavoritePageState extends State<FavoritePage> {
   String searchQuery = '';
   String? _playingPreviewUrl;
 
-  final List<Mood> moodTabs = [
+  static const Color bgColor = Color(0xFFFBFCF8);
+  static const Color primaryColor = Color(0xFF4E8E65);
+  static const Color deepGreen = Color(0xFF214A35);
+  static const Color textColor = Color(0xFF2B352E);
+  static const Color subTextColor = Color(0xFF7E877F);
+  static const Color lineColor = Color(0xFFE8E7DE);
+  static const Color cardColor = Color(0xFFFFFEFB);
+
+  final List<Mood> moodTabs = const [
     Mood(title: '開心', emoji: '😊', keyword: 'upbeat', color: Color(0xFFFFD166)),
     Mood(title: '難過', emoji: '😔', keyword: 'soft', color: Color(0xFF8ECAE6)),
     Mood(title: '焦慮', emoji: '😰', keyword: 'calm', color: Color(0xFFA8DADC)),
@@ -112,7 +108,7 @@ class _FavoritePageState extends State<FavoritePage> {
     if (song.previewUrl.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('這首歌曲沒有提供預覽音檔'),
           behavior: SnackBarBehavior.floating,
         ),
@@ -208,14 +204,13 @@ class _FavoritePageState extends State<FavoritePage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final themeColors = moodifyColors(MoodifyThemeController.instance.state);
 
     return Scaffold(
-      backgroundColor: themeColors.background,
+      backgroundColor: bgColor,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [themeColors.background, themeColors.background2, themeColors.card],
+            colors: [Color(0xFFFFFEFB), Color(0xFFFBFCF8), Color(0xFFFFFFFF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -228,21 +223,21 @@ class _FavoritePageState extends State<FavoritePage> {
               future: _favoriteSongsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 final songs = snapshot.data ?? [];
                 final filteredSongs = _getFilteredSongs(songs);
 
                 return ListView(
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
                   children: [
                     _buildHeader(),
-                    SizedBox(height: 22),
+                    const SizedBox(height: 22),
                     _buildSearchBar(),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     _buildTopTabs(),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     if (songs.isEmpty)
                       _buildEmptyView(user)
                     else ...[
@@ -254,14 +249,14 @@ class _FavoritePageState extends State<FavoritePage> {
                             ? filteredSongs.length
                             : songs.length,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       if (filteredSongs.isEmpty)
                         _buildNoFilteredResult()
                       else ...[
                         ...filteredSongs.take(4).map(_buildFavoriteTile),
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
                         _buildRecentHeader(),
-                        SizedBox(height: 14),
+                        const SizedBox(height: 14),
                         _buildRecentFavorites(
                           filteredSongs.length > 1
                               ? filteredSongs.skip(1).take(6).toList()
@@ -276,7 +271,7 @@ class _FavoritePageState extends State<FavoritePage> {
           ),
         ),
       ),
-      bottomNavigationBar: MoodifyBottomNavBar(
+      bottomNavigationBar: const MoodifyBottomNavBar(
         currentTab: MoodifyTab.favorite,
       ),
     );
@@ -293,7 +288,7 @@ class _FavoritePageState extends State<FavoritePage> {
             width: 190,
             height: 120,
             decoration: BoxDecoration(
-              color: Color.lerp(cardColor, softGreen, 0.62)!.withOpacity(0.58),
+              color: const Color(0xFFF7F2E8),
               borderRadius: BorderRadius.circular(90),
             ),
           ),
@@ -312,14 +307,14 @@ class _FavoritePageState extends State<FavoritePage> {
           top: 28,
           child: Icon(
             Icons.auto_awesome_rounded,
-            color: Color(0xFFD8C98E).withOpacity(0.72),
+            color: const Color(0xFFD8C98E).withOpacity(0.72),
             size: 16,
           ),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -362,12 +357,12 @@ class _FavoritePageState extends State<FavoritePage> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.92),
+                  color: Colors.white.withOpacity(0.92),
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: _softShadow(opacity: 0.08, blur: 20, y: 8),
-                  border: Border.all(color: lineColor, width: 1.2),
+                  border: Border.all(color: Colors.white, width: 1.2),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.music_note_rounded,
                   color: primaryColor,
                   size: 30,
@@ -383,46 +378,46 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildSearchBar() {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.92),
+        color: Colors.white.withOpacity(0.92),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: lineColor, width: 1.2),
+        border: Border.all(color: Colors.white, width: 1.2),
         boxShadow: _softShadow(opacity: 0.05, blur: 16, y: 6),
       ),
       child: Row(
         children: [
-          Icon(Icons.search_rounded, color: subTextColor, size: 28),
-          SizedBox(width: 10),
+          const Icon(Icons.search_rounded, color: Color(0xFF8F8A73), size: 28),
+          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _searchController,
               onChanged: (value) => setState(() => searchQuery = value),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: '搜尋你收藏的音樂或心情',
                 hintStyle: TextStyle(
-                  color: subTextColor.withOpacity(0.78),
+                  color: Color(0xFFA2A09A),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: softGreen,
+              color: const Color(0xFFF7F6F0),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.tune_rounded, color: primaryColor),
+            child: const Icon(Icons.tune_rounded, color: Color(0xFF8F8A73)),
           ),
         ],
       ),
@@ -436,9 +431,9 @@ class _FavoritePageState extends State<FavoritePage> {
       height: 52,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         itemCount: tabs.length,
-        separatorBuilder: (_, __) => SizedBox(width: 10),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final tab = tabs[index];
           final isSelected = selectedTab == tab;
@@ -449,15 +444,15 @@ class _FavoritePageState extends State<FavoritePage> {
           return GestureDetector(
             onTap: () => setState(() => selectedTab = tab),
             child: AnimatedContainer(
-              duration: Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? primaryColor : cardColor.withOpacity(0.88),
+                color: isSelected ? primaryColor : const Color(0xFFF4F3ED),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: isSelected
                       ? primaryColor
-                      : cardColor.withOpacity(0.9),
+                      : Colors.white.withOpacity(0.9),
                   width: 1.1,
                 ),
                 boxShadow: isSelected
@@ -468,13 +463,13 @@ class _FavoritePageState extends State<FavoritePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (mood != null) ...[
-                    Text(mood.emoji, style: TextStyle(fontSize: 16)),
-                    SizedBox(width: 6),
+                    Text(mood.emoji, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(width: 6),
                   ],
                   Text(
                     tab,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : textColor,
+                      color: isSelected ? Colors.white : deepGreen,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
@@ -495,15 +490,15 @@ class _FavoritePageState extends State<FavoritePage> {
       onTap: () => _openImmersivePlayer(song),
       child: Container(
         height: 230,
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
-          gradient: LinearGradient(
-            colors: [Color.lerp(cardColor, softGreen, 0.70)!, cardColor, Color.lerp(cardColor, primaryColor, 0.10)!],
+          gradient: const LinearGradient(
+            colors: [Color(0xFFEFF2F8), Color(0xFFFCEFD9), Color(0xFFF7E6E1)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: lineColor, width: 1.4),
+          border: Border.all(color: Colors.white, width: 1.4),
           boxShadow: _softShadow(opacity: 0.08, blur: 22, y: 10),
         ),
         child: Stack(
@@ -522,7 +517,7 @@ class _FavoritePageState extends State<FavoritePage> {
               top: 10,
               child: Icon(
                 Icons.auto_awesome_rounded,
-                color: cardColor.withOpacity(0.6),
+                color: Colors.white.withOpacity(0.6),
                 size: 18,
               ),
             ),
@@ -554,7 +549,7 @@ class _FavoritePageState extends State<FavoritePage> {
                   width: 74,
                   height: 74,
                   decoration: BoxDecoration(
-                    color: cardColor.withOpacity(0.93),
+                    color: Colors.white.withOpacity(0.93),
                     shape: BoxShape.circle,
                     boxShadow: _softShadow(opacity: 0.07, blur: 12, y: 6),
                   ),
@@ -569,22 +564,22 @@ class _FavoritePageState extends State<FavoritePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 22),
+                const SizedBox(height: 22),
                 Text(
                   _featuredTitle([song]),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: deepGreen,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   _featuredCountText(count),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: subTextColor,
+                    color: Color(0xFF5F6B64),
                   ),
                 ),
               ],
@@ -597,9 +592,9 @@ class _FavoritePageState extends State<FavoritePage> {
 
   Widget _featuredLandscapePlaceholder() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color.lerp(cardColor, softGreen, 0.72)!, cardColor, Color.lerp(cardColor, primaryColor, 0.12)!],
+          colors: [Color(0xFFF9EFD8), Color(0xFFE8EEF3), Color(0xFFEFD6D0)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -613,7 +608,7 @@ class _FavoritePageState extends State<FavoritePage> {
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.18),
+                color: const Color(0xFFC9D8E0).withOpacity(0.55),
                 borderRadius: BorderRadius.circular(40),
               ),
             ),
@@ -625,7 +620,7 @@ class _FavoritePageState extends State<FavoritePage> {
             child: Container(
               height: 20,
               decoration: BoxDecoration(
-                color: softGreen.withOpacity(0.72),
+                color: const Color(0xFFDDB9C6).withOpacity(0.35),
                 borderRadius: BorderRadius.circular(32),
               ),
             ),
@@ -637,7 +632,7 @@ class _FavoritePageState extends State<FavoritePage> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.24),
+                color: const Color(0xFFF3C3AA).withOpacity(0.9),
                 shape: BoxShape.circle,
               ),
             ),
@@ -651,18 +646,18 @@ class _FavoritePageState extends State<FavoritePage> {
     return GestureDetector(
       onTap: () => _openImmersivePlayer(song),
       child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cardColor.withOpacity(0.94),
+          color: Colors.white.withOpacity(0.94),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: lineColor, width: 1.1),
+          border: Border.all(color: Colors.white, width: 1.1),
           boxShadow: _softShadow(opacity: 0.045, blur: 14, y: 6),
         ),
         child: Row(
           children: [
             _buildArtwork(song, size: 92, radius: 18),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,29 +666,29 @@ class _FavoritePageState extends State<FavoritePage> {
                     song.trackName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: deepGreen,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     song.artistName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: subTextColor,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     _buildSongDescription(song),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: subTextColor,
@@ -702,12 +697,12 @@ class _FavoritePageState extends State<FavoritePage> {
                 ],
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Column(
               children: [
                 IconButton(
                   onPressed: () => _removeSong(song),
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.favorite_rounded,
                     color: primaryColor,
                     size: 28,
@@ -716,9 +711,9 @@ class _FavoritePageState extends State<FavoritePage> {
                 ),
                 PopupMenuButton<String>(
                   padding: EdgeInsets.zero,
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.more_vert_rounded,
-                    color: subTextColor,
+                    color: Color(0xFF738073),
                   ),
                   onSelected: (value) {
                     if (value == 'play') {
@@ -727,7 +722,7 @@ class _FavoritePageState extends State<FavoritePage> {
                       _removeSong(song);
                     }
                   },
-                  itemBuilder: (context) => [
+                  itemBuilder: (context) => const [
                     PopupMenuItem(value: 'play', child: Text('播放預覽')),
                     PopupMenuItem(value: 'remove', child: Text('移除收藏')),
                   ],
@@ -748,8 +743,8 @@ class _FavoritePageState extends State<FavoritePage> {
           color: primaryColor.withOpacity(0.74),
           size: 23,
         ),
-        SizedBox(width: 8),
-        Expanded(
+        const SizedBox(width: 8),
+        const Expanded(
           child: Text(
             '最近收藏',
             style: TextStyle(
@@ -763,9 +758,9 @@ class _FavoritePageState extends State<FavoritePage> {
           onPressed: () {},
           style: TextButton.styleFrom(
             foregroundColor: subTextColor,
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
@@ -793,7 +788,7 @@ class _FavoritePageState extends State<FavoritePage> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: displaySongs.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final song = displaySongs[index];
           final isPlaying = _playingPreviewUrl == song.previewUrl;
@@ -802,23 +797,23 @@ class _FavoritePageState extends State<FavoritePage> {
             onTap: () => _openImmersivePlayer(song),
             child: Container(
               width: 270,
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
                 gradient: LinearGradient(
                   colors: index.isEven
-                      ? [Color.lerp(cardColor, softGreen, 0.55)!, cardColor]
-                      : [Color.lerp(cardColor, primaryColor, 0.08)!, cardColor],
+                      ? [const Color(0xFFF1F7ED), Colors.white]
+                      : [const Color(0xFFF5F0FF), Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: lineColor, width: 1.1),
+                border: Border.all(color: Colors.white, width: 1.1),
                 boxShadow: _softShadow(opacity: 0.04, blur: 12, y: 6),
               ),
               child: Row(
                 children: [
                   _buildArtwork(song, size: 72, radius: 16),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -828,18 +823,18 @@ class _FavoritePageState extends State<FavoritePage> {
                           song.trackName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                             color: deepGreen,
                           ),
                         ),
-                        SizedBox(height: 6),
+                        const SizedBox(height: 6),
                         Text(
                           '${song.artistName} · ${song.collectionName.isEmpty ? '1' : '1'} 首歌曲',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: subTextColor,
@@ -854,7 +849,7 @@ class _FavoritePageState extends State<FavoritePage> {
                       width: 46,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: cardColor.withOpacity(0.90),
+                        color: Colors.white.withOpacity(0.90),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -902,7 +897,7 @@ class _FavoritePageState extends State<FavoritePage> {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFFF1F5EE), Color(0xFFFAFBF8)],
           begin: Alignment.topLeft,
@@ -930,9 +925,9 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildNoFilteredResult() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       decoration: _cardDecoration(radius: 26),
-      child: Column(
+      child: const Column(
         children: [
           Icon(Icons.music_off_rounded, color: primaryColor, size: 42),
           SizedBox(height: 12),
@@ -963,22 +958,22 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildEmptyView(User? user) {
     return Column(
       children: [
-        SizedBox(height: 56),
+        const SizedBox(height: 56),
         Container(
           width: 96,
           height: 96,
           decoration: BoxDecoration(
-            color: Color(0xFFEAF3EA),
+            color: const Color(0xFFEAF3EA),
             borderRadius: BorderRadius.circular(28),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.favorite_rounded,
             color: primaryColor,
             size: 46,
           ),
         ),
-        SizedBox(height: 20),
-        Text(
+        const SizedBox(height: 20),
+        const Text(
           '還沒有收藏歌曲',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -987,8 +982,8 @@ class _FavoritePageState extends State<FavoritePage> {
             color: deepGreen,
           ),
         ),
-        SizedBox(height: 8),
-        Text(
+        const SizedBox(height: 8),
+        const Text(
           '到推薦頁按下愛心，就可以把喜歡的歌曲收藏起來。',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -998,17 +993,17 @@ class _FavoritePageState extends State<FavoritePage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Container(
           width: double.infinity,
-          padding: EdgeInsets.all(18),
+          padding: const EdgeInsets.all(18),
           decoration: _cardDecoration(radius: 24),
           child: Text(
             user == null
                 ? '目前尚未登入，收藏會先存在本機。登入 Google 後即可同步到雲端。'
                 : '你已登入 Google，收藏歌曲會儲存在雲端，換裝置也能同步。',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               height: 1.45,
               color: subTextColor,
@@ -1024,12 +1019,12 @@ class _FavoritePageState extends State<FavoritePage> {
     return Container(
       height: 88,
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: primaryColor.withOpacity(0.07),
             blurRadius: 22,
-            offset: Offset(0, -6),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -1043,7 +1038,7 @@ class _FavoritePageState extends State<FavoritePage> {
               onTap: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => HomePage()),
+                  MaterialPageRoute(builder: (_) => const HomePage()),
                   (_) => false,
                 );
               },
@@ -1103,21 +1098,21 @@ class _FavoritePageState extends State<FavoritePage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? primaryColor : Color(0xFFB0B4AE),
+              color: isSelected ? primaryColor : const Color(0xFFB0B4AE),
               size: 26,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                color: isSelected ? primaryColor : Color(0xFF9CA39C),
+                color: isSelected ? primaryColor : const Color(0xFF9CA39C),
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             AnimatedContainer(
-              duration: Duration(milliseconds: 180),
+              duration: const Duration(milliseconds: 180),
               width: isSelected ? 28 : 0,
               height: 3,
               decoration: BoxDecoration(
@@ -1135,7 +1130,7 @@ class _FavoritePageState extends State<FavoritePage> {
     return BoxDecoration(
       color: cardColor.withOpacity(0.96),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: lineColor, width: 1.2),
+      border: Border.all(color: Colors.white, width: 1.2),
       boxShadow: _softShadow(opacity: 0.05, blur: 16, y: 6),
     );
   }
@@ -1152,7 +1147,7 @@ class _FavoritePageState extends State<FavoritePage> {
         offset: Offset(0, y),
       ),
       BoxShadow(
-        color: textColor.withOpacity(opacity * 0.10),
+        color: Colors.black.withOpacity(opacity * 0.18),
         blurRadius: blur * 0.6,
         offset: Offset(0, y * 0.45),
       ),

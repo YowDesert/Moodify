@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/app_theme_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/mood.dart';
@@ -18,17 +17,6 @@ class RecommendPage extends StatefulWidget {
 }
 
 class _RecommendPageState extends State<RecommendPage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
   final GeminiMusicRecommendationService _musicRecommendationService =
       GeminiMusicRecommendationService();
   final MoodHistoryService _moodHistoryService = MoodHistoryService();
@@ -62,7 +50,7 @@ class _RecommendPageState extends State<RecommendPage> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('正在請 Gemini 重新推薦歌曲...'),
         behavior: SnackBarBehavior.floating,
       ),
@@ -71,18 +59,17 @@ class _RecommendPageState extends State<RecommendPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColors = moodifyColors(MoodifyThemeController.instance.state);
     return Scaffold(
-      backgroundColor: themeColors.background,
+      backgroundColor: const Color(0xFFF3FBF6),
       appBar: AppBar(
-        backgroundColor: themeColors.background,
+        backgroundColor: const Color(0xFFF3FBF6),
         elevation: 0,
-        foregroundColor: themeColors.text,
+        foregroundColor: const Color(0xFF1F5C49),
         title: Text('${widget.mood.emoji} ${widget.mood.title} 推薦'),
         actions: [
           IconButton(
             onPressed: _refreshSongs,
-            icon: Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
@@ -90,24 +77,24 @@ class _RecommendPageState extends State<RecommendPage> {
         onRefresh: () async {
           _refreshSongs();
         },
-        color: themeColors.primary,
+        color: const Color(0xFF2E7D62),
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(22, 12, 22, 28),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMoodHero(),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               _buildSectionHeader(
                 title: 'Gemini AI 推薦',
                 subtitle: '依照你的心情即時產生歌曲清單',
               ),
-              SizedBox(height: 14),
+              const SizedBox(height: 14),
               _buildMusicSection(),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               _buildSectionHeader(title: '今日療癒語錄', subtitle: '給現在的你一點溫柔'),
-              SizedBox(height: 14),
+              const SizedBox(height: 14),
               _buildQuoteCard(),
             ],
           ),
@@ -119,22 +106,22 @@ class _RecommendPageState extends State<RecommendPage> {
   Widget _buildMoodHero() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
         gradient: LinearGradient(
           colors: [
             widget.mood.color.withOpacity(0.82),
-            softGreen,
+            const Color(0xFFEAF8F0),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF2E7D62).withOpacity(0.14),
+            color: const Color(0xFF2E7D62).withOpacity(0.14),
             blurRadius: 24,
-            offset: Offset(0, 14),
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -147,7 +134,7 @@ class _RecommendPageState extends State<RecommendPage> {
               widget.mood.emoji,
               style: TextStyle(
                 fontSize: 115,
-                color: cardColor.withOpacity(0.22),
+                color: Colors.white.withOpacity(0.22),
               ),
             ),
           ),
@@ -157,29 +144,29 @@ class _RecommendPageState extends State<RecommendPage> {
             child: Icon(
               Icons.graphic_eq_rounded,
               size: 90,
-              color: cardColor.withOpacity(0.18),
+              color: Colors.white.withOpacity(0.18),
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMoodTag(),
-              SizedBox(height: 18),
-              Text(widget.mood.emoji, style: TextStyle(fontSize: 54)),
-              SizedBox(height: 12),
+              const SizedBox(height: 18),
+              Text(widget.mood.emoji, style: const TextStyle(fontSize: 54)),
+              const SizedBox(height: 12),
               Text(
                 '你選擇了「${widget.mood.title}」',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF123D30),
                   letterSpacing: -0.4,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 _getMoodDescription(widget.mood.title),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   height: 1.55,
                   fontWeight: FontWeight.w500,
@@ -195,23 +182,23 @@ class _RecommendPageState extends State<RecommendPage> {
 
   Widget _buildMoodTag() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.35),
+        color: Colors.white.withOpacity(0.35),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.auto_awesome_rounded,
             size: 15,
             color: Color(0xFF1F5C49),
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             _getMusicType(widget.mood.title),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1F5C49),
@@ -235,17 +222,17 @@ class _RecommendPageState extends State<RecommendPage> {
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF1F5C49),
                   letterSpacing: -0.3,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF6D8B7D),
@@ -296,16 +283,16 @@ class _RecommendPageState extends State<RecommendPage> {
               moodEmoji: widget.mood.emoji,
               moodColor: widget.mood.color.value,
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             _buildReasonCard(result),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildSectionHeader(
               title: '更多相似心情歌曲',
               subtitle: result?.usedAi == true
                   ? 'AI 每次會換不同歌手與曲風'
                   : '目前使用備用推薦，避免空白畫面',
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             ...otherSongs.map(
               (song) => SongCard(
                 song: song,
@@ -323,11 +310,11 @@ class _RecommendPageState extends State<RecommendPage> {
   Widget _buildReasonCard(AiMusicRecommendationResult? result) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: softGreen,
+        color: const Color(0xFFEAF8F0),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Color(0xFFD6ECDF)),
+        border: Border.all(color: const Color(0xFFD6ECDF)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,21 +323,21 @@ class _RecommendPageState extends State<RecommendPage> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: cardColor.withOpacity(0.8),
+              color: Colors.white.withOpacity(0.8),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.psychology_alt_rounded,
               color: Color(0xFF2E7D62),
               size: 25,
             ),
           ),
-          SizedBox(width: 13),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   '推薦理由',
                   style: TextStyle(
                     color: Color(0xFF1F5C49),
@@ -358,10 +345,10 @@ class _RecommendPageState extends State<RecommendPage> {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   result?.reason ?? _getRecommendationReason(widget.mood.title),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF5F7F73),
                     fontSize: 14,
                     height: 1.55,
@@ -379,20 +366,20 @@ class _RecommendPageState extends State<RecommendPage> {
   Widget _buildLoadingMusicCard() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Color(0xFFE1F0E8)),
+        border: Border.all(color: const Color(0xFFE1F0E8)),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF2E7D62).withOpacity(0.06),
+            color: const Color(0xFF2E7D62).withOpacity(0.06),
             blurRadius: 16,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Row(
+      child: const Row(
         children: [
           SizedBox(
             width: 23,
@@ -420,36 +407,36 @@ class _RecommendPageState extends State<RecommendPage> {
   }) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Color(0xFFE1F0E8)),
+        border: Border.all(color: const Color(0xFFE1F0E8)),
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.wifi_off_rounded,
             color: Color(0xFF2E7D62),
             size: 42,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF1F5C49),
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: onRetry,
-            icon: Icon(Icons.refresh_rounded),
-            label: Text('重新載入'),
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('重新載入'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Color(0xFF2E7D62),
-              side: BorderSide(color: Color(0xFF2E7D62)),
+              foregroundColor: const Color(0xFF2E7D62),
+              side: const BorderSide(color: Color(0xFF2E7D62)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -463,23 +450,23 @@ class _RecommendPageState extends State<RecommendPage> {
   Widget _buildQuoteCard() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Color(0xFFE1F0E8)),
+        border: Border.all(color: const Color(0xFFE1F0E8)),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF2E7D62).withOpacity(0.07),
+            color: const Color(0xFF2E7D62).withOpacity(0.07),
             blurRadius: 18,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '“',
             style: TextStyle(
               fontSize: 42,
@@ -488,11 +475,11 @@ class _RecommendPageState extends State<RecommendPage> {
               fontWeight: FontWeight.w900,
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               _getQuote(widget.mood.title),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 height: 1.7,
                 fontWeight: FontWeight.w600,

@@ -6,7 +6,7 @@ class Mood {
   final String keyword;
   final Color color;
 
-  Mood({
+  const Mood({
     required this.title,
     required this.emoji,
     required this.keyword,

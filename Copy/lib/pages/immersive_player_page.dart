@@ -17,7 +17,7 @@ class ImmersivePlayerPage extends StatefulWidget {
   final int? moodColor;
   final bool autoPlay;
 
-  ImmersivePlayerPage({
+  const ImmersivePlayerPage({
     super.key,
     required this.song,
     this.moodTitle,
@@ -44,7 +44,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
   bool _isPlaying = false;
   bool _isFavorite = false;
   Duration _position = Duration.zero;
-  Duration _duration = Duration(seconds: 30);
+  Duration _duration = const Duration(seconds: 30);
 
   Color get _moodColor => Color(widget.moodColor ?? widget.song.moodColor);
   String get _moodTitle => widget.moodTitle ?? widget.song.moodTitle;
@@ -55,7 +55,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
     super.initState();
     _waveController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
     _audioPlayer.onPlayerComplete.listen((event) {
@@ -90,7 +90,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           end: Alignment.bottomRight,
         ),
       ),
-      child: Center(
+      child: const Center(
         child: Icon(
           Icons.music_note_rounded,
           size: 96,
@@ -189,32 +189,32 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
     final artwork = widget.song.artworkUrl.replaceAll('100x100bb', '600x600bb');
 
     return Scaffold(
-      backgroundColor: Color(0xFF101815),
+      backgroundColor: const Color(0xFF101815),
       body: Stack(
         children: [
           Positioned.fill(child: _buildBackground(artwork)),
           Positioned.fill(
             child: SafeArea(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(22, 12, 22, 28),
+                padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
                 child: Column(
                   children: [
                     _buildTopBar(),
-                    Spacer(),
+                    const Spacer(),
                     Hero(
                       tag:
                           'artwork-${widget.song.artworkUrl}-${widget.song.trackName}',
                       child: _buildArtwork(artwork),
                     ),
-                    SizedBox(height: 28),
+                    const SizedBox(height: 28),
                     _buildSongText(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _buildWave(),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildProgress(),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildControls(),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildMoodChip(),
                   ],
                 ),
@@ -234,7 +234,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           Image.network(
             artwork,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => SizedBox.shrink(),
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
           ),
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
@@ -264,7 +264,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           icon: Icons.keyboard_arrow_down_rounded,
           onTap: () => Navigator.pop(context),
         ),
-        Expanded(
+        const Expanded(
           child: Text(
             '沉浸播放',
             textAlign: TextAlign.center,
@@ -280,7 +280,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           onTap: _openOnSpotify,
           tooltip: 'Spotify',
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         _circleButton(
           icon: Icons.ondemand_video_rounded,
           onTap: _openOnYoutube,
@@ -302,7 +302,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
               BoxShadow(
                 color: Colors.black.withOpacity(0.34),
                 blurRadius: 42,
-                offset: Offset(0, 24),
+                offset: const Offset(0, 24),
               ),
             ],
           ),
@@ -324,7 +324,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
   Widget _placeholderArtwork() {
     return Container(
       color: Colors.white.withOpacity(0.14),
-      child: Icon(
+      child: const Icon(
         Icons.music_note_rounded,
         color: Colors.white,
         size: 84,
@@ -340,7 +340,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 27,
             height: 1.15,
@@ -348,7 +348,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
             letterSpacing: -0.7,
           ),
         ),
-        SizedBox(height: 9),
+        const SizedBox(height: 9),
         Text(
           widget.song.artistName,
           textAlign: TextAlign.center,
@@ -379,7 +379,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
             return Container(
               width: 4,
               height: (base + pulse).clamp(10.0, 42.0),
-              margin: EdgeInsets.symmetric(horizontal: 3),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.22 + (9 - distance) * 0.035),
                 borderRadius: BorderRadius.circular(999),
@@ -405,10 +405,10 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
             minHeight: 7,
             value: progress,
             backgroundColor: Colors.white.withOpacity(0.18),
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -440,11 +440,11 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
           size: 54,
           isActive: _isFavorite,
         ),
-        SizedBox(width: 18),
+        const SizedBox(width: 18),
         GestureDetector(
           onTap: _togglePlay,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 220),
+            duration: const Duration(milliseconds: 220),
             width: 78,
             height: 78,
             decoration: BoxDecoration(
@@ -460,12 +460,12 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
             ),
             child: Icon(
               _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              color: Color(0xFF1F5C49),
+              color: const Color(0xFF1F5C49),
               size: 42,
             ),
           ),
         ),
-        SizedBox(width: 18),
+        const SizedBox(width: 18),
         _circleButton(icon: Icons.replay_rounded, onTap: _restart, size: 54),
       ],
     );
@@ -474,7 +474,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
   Widget _buildMoodChip() {
     final text = _moodTitle.isEmpty ? '適合現在的心情' : '$_moodEmoji $_moodTitle';
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.14),
         borderRadius: BorderRadius.circular(999),
@@ -482,7 +482,7 @@ class _ImmersivePlayerPageState extends State<ImmersivePlayerPage>
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 13,
           fontWeight: FontWeight.w800,

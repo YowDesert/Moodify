@@ -10,7 +10,7 @@ class Song {
   final String moodEmoji;
   final int moodColor;
 
-  Song({
+  const Song({
     required this.trackName,
     required this.artistName,
     required this.collectionName,
@@ -60,8 +60,8 @@ class Song {
 
   factory Song.fromSpotifyTrack(Map<String, dynamic> track) {
     final album = track['album'] as Map<String, dynamic>? ?? {};
-    final artists = (track['artists'] as List?) ?? [];
-    final images = (album['images'] as List?) ?? [];
+    final artists = (track['artists'] as List?) ?? const [];
+    final images = (album['images'] as List?) ?? const [];
     final externalUrls = track['external_urls'] as Map<String, dynamic>? ?? {};
 
     String artistName = '未知歌手';

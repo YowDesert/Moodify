@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/app_theme_controller.dart';
 
 import '../services/firebase_mood_history_service.dart';
 import '../services/mood_history_service.dart';
@@ -15,20 +14,14 @@ class WeeklyReportPage extends StatefulWidget {
 }
 
 class _WeeklyReportPageState extends State<WeeklyReportPage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
   final MoodHistoryService _historyService = MoodHistoryService();
   final FirebaseMoodHistoryService _firebaseHistoryService =
       FirebaseMoodHistoryService();
+
+  static const Color bgColor = Color(0xFFFAFAF7);
+  static const Color primaryColor = Color(0xFF3F7D5B);
+  static const Color textColor = Color(0xFF1F2522);
+  static const Color subTextColor = Color(0xFF747B76);
 
   late Future<List<Map<String, dynamic>>> _recordsFuture;
 
@@ -51,15 +44,14 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColors = moodifyColors(MoodifyThemeController.instance.state);
     return Scaffold(
-      backgroundColor: themeColors.background,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _recordsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: primaryColor),
               );
             }
@@ -71,20 +63,20 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
               onRefresh: _refresh,
               color: primaryColor,
               child: ListView(
-                padding: EdgeInsets.fromLTRB(20, 14, 20, 28),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
                 children: [
                   _buildTopBar(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   _buildHeroCard(report),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildStatsRow(report),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildTrendCard(report),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildMoodDistribution(report),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildSuggestionCard(report),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildDailyList(report),
                 ],
               ),
@@ -106,13 +98,13 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: lineColor),
+              border: Border.all(color: const Color(0xFFE8E5DE)),
             ),
-            child: Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           ),
         ),
-        SizedBox(width: 12),
-        Expanded(
+        const SizedBox(width: 12),
+        const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -143,20 +135,20 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   Widget _buildHeroCard(_WeeklyReport report) {
     return Container(
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [cardColor, softGreen],
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFEAF8F0)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: lineColor),
+        border: Border.all(color: Colors.white),
         boxShadow: [
           BoxShadow(
             color: primaryColor.withOpacity(0.10),
             blurRadius: 28,
-            offset: Offset(0, 14),
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -175,24 +167,24 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Color(0xFFE2F2E8),
+                  color: const Color(0xFFE2F2E8),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   report.dateRangeText,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: primaryColor,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               Text(
                 report.heroTitle,
-                style: TextStyle(
+                style: const TextStyle(
                   color: textColor,
                   fontSize: 25,
                   height: 1.25,
@@ -200,10 +192,10 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                   letterSpacing: -0.6,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 report.heroSubtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   color: subTextColor,
                   fontSize: 14.5,
                   height: 1.55,
@@ -227,7 +219,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             icon: Icons.edit_note_rounded,
           ),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
           child: _smallStatCard(
             value: report.topMoodText,
@@ -235,7 +227,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             icon: Icons.favorite_rounded,
           ),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
           child: _smallStatCard(
             value: '${report.activeDays}/7',
@@ -253,29 +245,29 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
     required IconData icon,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
       decoration: _cardDecoration(radius: 22),
       child: Column(
         children: [
           Icon(icon, color: primaryColor, size: 22),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: const TextStyle(
               color: textColor,
               fontSize: 19,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.4,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: const TextStyle(
               color: subTextColor,
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
@@ -288,23 +280,18 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   Widget _buildTrendCard(_WeeklyReport report) {
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(radius: 26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle('7 天心情曲線', '不是評分高低，而是幫你看見狀態'),
-          SizedBox(height: 18),
+          const SizedBox(height: 18),
           SizedBox(
             height: 180,
             width: double.infinity,
             child: CustomPaint(
-              painter: _WeeklyTrendPainter(
-                days: report.days,
-                primaryColor: primaryColor,
-                lineColor: lineColor,
-                subTextColor: subTextColor,
-              ),
+              painter: _WeeklyTrendPainter(days: report.days),
             ),
           ),
         ],
@@ -314,15 +301,15 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   Widget _buildMoodDistribution(_WeeklyReport report) {
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(radius: 26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle('心情比例', '本週比較常出現的情緒'),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (report.moodCounts.isEmpty)
-            Text(
+            const Text(
               '這週還沒有心情紀錄，先從首頁選一個心情開始。',
               style: TextStyle(color: subTextColor, fontWeight: FontWeight.w600),
             )
@@ -330,7 +317,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             ...report.moodCounts.entries.map((entry) {
               final ratio = entry.value / report.weekRecords.length;
               return Padding(
-                padding: EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -339,7 +326,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                         Expanded(
                           child: Text(
                             entry.key,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: textColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w900,
@@ -348,7 +335,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                         ),
                         Text(
                           '${entry.value} 次',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: subTextColor,
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
@@ -356,13 +343,13 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 7),
+                    const SizedBox(height: 7),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(99),
                       child: LinearProgressIndicator(
                         value: ratio,
                         minHeight: 8,
-                        backgroundColor: softGreen,
+                        backgroundColor: const Color(0xFFEAF3EC),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           _colorForMood(entry.key),
                         ),
@@ -379,11 +366,11 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   Widget _buildSuggestionCard(_WeeklyReport report) {
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Color(0xFFEEF8F2),
+        color: const Color(0xFFEEF8F2),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Color(0xFFD9EEE2)),
+        border: Border.all(color: const Color(0xFFD9EEE2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,17 +379,17 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: cardColor.withOpacity(0.82),
+              color: Colors.white.withOpacity(0.82),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(Icons.lightbulb_rounded, color: primaryColor),
+            child: const Icon(Icons.lightbulb_rounded, color: primaryColor),
           ),
-          SizedBox(width: 13),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Moodify 給你的建議',
                   style: TextStyle(
                     color: textColor,
@@ -410,10 +397,10 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 7),
+                const SizedBox(height: 7),
                 Text(
                   report.suggestion,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: subTextColor,
                     fontSize: 14,
                     height: 1.5,
@@ -430,13 +417,13 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
 
   Widget _buildDailyList(_WeeklyReport report) {
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(radius: 26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle('每日紀錄', '最近 7 天的心情足跡'),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           ...report.days.map((day) {
             final mood = day.records.isEmpty
                 ? '尚無紀錄'
@@ -444,12 +431,12 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                     ? day.records.first['title'].toString()
                     : '${day.records.first['emoji']} ${day.records.first['title']}';
             return Container(
-              margin: EdgeInsets.only(bottom: 10),
-              padding: EdgeInsets.all(13),
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(13),
               decoration: BoxDecoration(
-                color: Color(0xFFFAFBF7),
+                color: const Color(0xFFFAFBF7),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: lineColor),
+                border: Border.all(color: const Color(0xFFE8E5DE)),
               ),
               child: Row(
                 children: [
@@ -457,7 +444,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                     width: 48,
                     child: Text(
                       day.weekdayText,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: primaryColor,
                         fontWeight: FontWeight.w900,
                       ),
@@ -476,7 +463,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
                   ),
                   Text(
                     day.records.isEmpty ? '' : '${day.records.length} 筆',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: subTextColor,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -497,17 +484,17 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             color: textColor,
             fontSize: 17,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.3,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           subtitle,
-          style: TextStyle(
+          style: const TextStyle(
             color: subTextColor,
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
@@ -521,24 +508,24 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
     return BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: lineColor, width: 0.8),
+      border: Border.all(color: const Color(0xFFE8E5DE), width: 0.8),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.035),
           blurRadius: 22,
-          offset: Offset(0, 12),
+          offset: const Offset(0, 12),
         ),
       ],
     );
   }
 
   Color _colorForMood(String mood) {
-    if (mood.contains('開心')) return Color(0xFFFFC857);
-    if (mood.contains('難過')) return Color(0xFF8ECAE6);
-    if (mood.contains('焦慮')) return Color(0xFFA8DADC);
-    if (mood.contains('疲憊')) return Color(0xFFCDB4DB);
-    if (mood.contains('專心')) return Color(0xFF74C69D);
-    return Color(0xFF95D5B2);
+    if (mood.contains('開心')) return const Color(0xFFFFC857);
+    if (mood.contains('難過')) return const Color(0xFF8ECAE6);
+    if (mood.contains('焦慮')) return const Color(0xFFA8DADC);
+    if (mood.contains('疲憊')) return const Color(0xFFCDB4DB);
+    if (mood.contains('專心')) return const Color(0xFF74C69D);
+    return const Color(0xFF95D5B2);
   }
 }
 
@@ -560,7 +547,7 @@ class _WeeklyReport {
   factory _WeeklyReport.fromRecords(List<Map<String, dynamic>> records) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final start = today.subtract(Duration(days: 6));
+    final start = today.subtract(const Duration(days: 6));
     final end = today;
 
     DateTime? parseDate(dynamic value) {
@@ -694,26 +681,20 @@ class _DayMood {
 
 class _WeeklyTrendPainter extends CustomPainter {
   final List<_DayMood> days;
-  final Color primaryColor;
-  final Color lineColor;
-  final Color subTextColor;
 
-  _WeeklyTrendPainter({
-    required this.days,
-    required this.primaryColor,
-    required this.lineColor,
-    required this.subTextColor,
-  });
+  _WeeklyTrendPainter({required this.days});
 
   @override
   void paint(Canvas canvas, Size size) {
+    const primary = Color(0xFF3F7D5B);
+    const grid = Color(0xFFE8E5DE);
     final top = 12.0;
     final bottom = size.height - 34;
     final chartHeight = bottom - top;
     final step = size.width / math.max(days.length - 1, 1);
 
     final gridPaint = Paint()
-      ..color = lineColor
+      ..color = grid
       ..strokeWidth = 1;
 
     for (final ratio in [0.0, 0.5, 1.0]) {
@@ -744,25 +725,25 @@ class _WeeklyTrendPainter extends CustomPainter {
         ..close();
 
       final fillPaint = Paint()
-        ..shader = LinearGradient(
-          colors: [primaryColor.withOpacity(0.25), primaryColor.withOpacity(0.0)],
+        ..shader = const LinearGradient(
+          colors: [Color(0x553F7D5B), Color(0x00FFFFFF)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ).createShader(Rect.fromLTWH(0, top, size.width, chartHeight));
       canvas.drawPath(fillPath, fillPaint);
 
       final linePaint = Paint()
-        ..color = primaryColor
+        ..color = primary
         ..strokeWidth = 3.2
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
       canvas.drawPath(path, linePaint);
     }
 
-    final dotPaint = Paint()..color = primaryColor;
-    final emptyDotPaint = Paint()..color = Color(0xFFC9D8C8);
-    final labelStyle = TextStyle(
-      color: subTextColor,
+    final dotPaint = Paint()..color = primary;
+    final emptyDotPaint = Paint()..color = const Color(0xFFC9D8C8);
+    final labelStyle = const TextStyle(
+      color: Color(0xFF747B76),
       fontSize: 11,
       fontWeight: FontWeight.w700,
     );
@@ -780,9 +761,6 @@ class _WeeklyTrendPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WeeklyTrendPainter oldDelegate) {
-    return oldDelegate.days != days ||
-        oldDelegate.primaryColor != primaryColor ||
-        oldDelegate.lineColor != lineColor ||
-        oldDelegate.subTextColor != subTextColor;
+    return oldDelegate.days != days;
   }
 }

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/mood.dart';
 
 class MoodHistoryService {
-  static String _historyKey = 'mood_history';
+  static const String _historyKey = 'mood_history';
 
   Future<void> addMoodRecord(Mood mood) async {
     final prefs = await SharedPreferences.getInstance();

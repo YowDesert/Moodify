@@ -7,7 +7,6 @@ import '../pages/immersive_player_page.dart';
 import '../services/favorite_service.dart';
 import '../services/firebase_favorite_service.dart';
 import '../services/spotify_search_service.dart';
-import '../services/app_theme_controller.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
@@ -16,7 +15,7 @@ class SongCard extends StatefulWidget {
   final String? moodEmoji;
   final int? moodColor;
 
-  SongCard({
+  const SongCard({
     super.key,
     required this.song,
     this.isFeatured = false,
@@ -136,12 +135,7 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<MoodifyThemeState>(
-      valueListenable: MoodifyThemeController.instance.notifier,
-      builder: (context, themeState, _) {
-        return widget.isFeatured ? _buildFeaturedCard() : _buildNormalCard();
-      },
-    );
+    return widget.isFeatured ? _buildFeaturedCard() : _buildNormalCard();
   }
 
   Widget _buildFeaturedCard() {
@@ -150,13 +144,13 @@ class _SongCardState extends State<SongCard> {
       borderRadius: BorderRadius.circular(30),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: _cardDecoration(radius: 30, blur: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildFeaturedImage(),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -166,7 +160,7 @@ class _SongCardState extends State<SongCard> {
                     albumSize: 13,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 _buildActionButton(
                   icon: _isFavorite
                       ? Icons.favorite_rounded
@@ -175,14 +169,14 @@ class _SongCardState extends State<SongCard> {
                   onTap: _addToFavorite,
                   size: 46,
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _buildActionButton(
                   icon: Icons.fullscreen_rounded,
                   isActive: false,
                   onTap: _openPlayer,
                   size: 46,
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _buildActionButton(
                   icon: _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
                   isActive: _isPlaying,
@@ -232,8 +226,8 @@ class _SongCardState extends State<SongCard> {
       onTap: _openPlayer,
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        margin: EdgeInsets.only(bottom: 14),
-        padding: EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
         decoration: _cardDecoration(radius: 24, blur: 16),
         child: Row(
           children: [
@@ -241,9 +235,9 @@ class _SongCardState extends State<SongCard> {
               tag: 'artwork-${widget.song.artworkUrl}-${widget.song.trackName}',
               child: _buildArtwork(),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(child: _buildSongInfo()),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Column(
               children: [
                 _buildActionButton(
@@ -254,7 +248,7 @@ class _SongCardState extends State<SongCard> {
                   onTap: _addToFavorite,
                   size: 38,
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 _buildActionButton(
                   icon: _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
                   isActive: _isPlaying,
@@ -325,7 +319,7 @@ class _SongCardState extends State<SongCard> {
               fontWeight: FontWeight.w900,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
         ],
         Text(
           widget.song.trackName,
@@ -334,15 +328,15 @@ class _SongCardState extends State<SongCard> {
           style: TextStyle(
             fontSize: titleSize,
             fontWeight: FontWeight.w900,
-            color: moodifyColors(MoodifyThemeController.instance.state).text,
+            color: const Color(0xFF1F5C49),
             letterSpacing: -0.2,
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         Row(
           children: [
-            Icon(Icons.person_rounded, size: 14, color: moodifyColors(MoodifyThemeController.instance.state).subText),
-            SizedBox(width: 4),
+            const Icon(Icons.person_rounded, size: 14, color: Color(0xFF5F7F73)),
+            const SizedBox(width: 4),
             Expanded(
               child: Text(
                 widget.song.artistName,
@@ -351,13 +345,13 @@ class _SongCardState extends State<SongCard> {
                 style: TextStyle(
                   fontSize: artistSize,
                   fontWeight: FontWeight.w700,
-                  color: moodifyColors(MoodifyThemeController.instance.state).subText,
+                  color: const Color(0xFF5F7F73),
                 ),
               ),
             ),
           ],
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           widget.song.collectionName,
           maxLines: 1,
@@ -365,7 +359,7 @@ class _SongCardState extends State<SongCard> {
           style: TextStyle(
             fontSize: albumSize,
             fontWeight: FontWeight.w500,
-            color: moodifyColors(MoodifyThemeController.instance.state).subText.withOpacity(0.75),
+            color: const Color(0xFF9AAFA6),
           ),
         ),
       ],
@@ -382,25 +376,25 @@ class _SongCardState extends State<SongCard> {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 180),
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: isActive ? moodifyColors(MoodifyThemeController.instance.state).primary : moodifyColors(MoodifyThemeController.instance.state).soft,
+          color: isActive ? const Color(0xFF2E7D62) : const Color(0xFFE0F2E8),
           borderRadius: BorderRadius.circular(size * 0.36),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: moodifyColors(MoodifyThemeController.instance.state).primary.withOpacity(0.22),
+                    color: const Color(0xFF2E7D62).withOpacity(0.22),
                     blurRadius: 12,
-                    offset: Offset(0, 6),
+                    offset: const Offset(0, 6),
                   ),
                 ]
               : [],
         ),
         child: Icon(
           icon,
-          color: isActive ? Colors.white : moodifyColors(MoodifyThemeController.instance.state).primary,
+          color: isActive ? Colors.white : const Color(0xFF2E7D62),
           size: size >= 46 ? 27 : 22,
         ),
       ),
@@ -409,19 +403,19 @@ class _SongCardState extends State<SongCard> {
 
   Widget _pill(IconData icon, String text) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: moodifyColors(MoodifyThemeController.instance.state).card.withOpacity(0.90),
+        color: Colors.white.withOpacity(0.90),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 15, color: moodifyColors(MoodifyThemeController.instance.state).primary),
-          SizedBox(width: 5),
+          Icon(icon, size: 15, color: const Color(0xFF2E7D62)),
+          const SizedBox(width: 5),
           Text(
             text,
-            style: TextStyle(
-              color: moodifyColors(MoodifyThemeController.instance.state).primary,
+            style: const TextStyle(
+              color: Color(0xFF2E7D62),
               fontSize: 12,
               fontWeight: FontWeight.w900,
             ),
@@ -441,12 +435,12 @@ class _SongCardState extends State<SongCard> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: moodifyColors(MoodifyThemeController.instance.state).soft,
+        color: const Color(0xFFE0F2E8),
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: moodifyColors(MoodifyThemeController.instance.state).primary,
+        color: const Color(0xFF2E7D62),
         size: iconSize,
       ),
     );
@@ -454,14 +448,14 @@ class _SongCardState extends State<SongCard> {
 
   BoxDecoration _cardDecoration({required double radius, required double blur}) {
     return BoxDecoration(
-      color: moodifyColors(MoodifyThemeController.instance.state).card,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: moodifyColors(MoodifyThemeController.instance.state).line),
+      border: Border.all(color: const Color(0xFFE1F0E8)),
       boxShadow: [
         BoxShadow(
-          color: moodifyColors(MoodifyThemeController.instance.state).primary.withOpacity(0.07),
+          color: const Color(0xFF2E7D62).withOpacity(0.07),
           blurRadius: blur,
-          offset: Offset(0, 10),
+          offset: const Offset(0, 10),
         ),
       ],
     );

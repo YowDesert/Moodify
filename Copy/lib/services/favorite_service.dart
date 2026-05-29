@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/song.dart';
 
 class FavoriteService {
-  static String _favoriteSongsKey = 'favorite_songs';
+  static const String _favoriteSongsKey = 'favorite_songs';
 
   Future<List<Song>> getFavoriteSongs() async {
     final prefs = await SharedPreferences.getInstance();

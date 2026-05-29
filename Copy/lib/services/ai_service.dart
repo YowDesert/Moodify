@@ -12,7 +12,7 @@ class AiChatResult {
   final String musicTitle;
   final String musicDescription;
 
-  AiChatResult({
+  const AiChatResult({
     required this.reply,
     required this.moodKey,
     required this.actions,
@@ -34,7 +34,7 @@ class AiChatResult {
       return AiChatResult(
         reply: replies[random.nextInt(replies.length)],
         moodKey: 'upbeat',
-        actions: ['開心歌單', '記下今天'],
+        actions: const ['開心歌單', '記下今天'],
         musicTitle: '把好心情放大',
         musicDescription: '明亮流行、輕快節奏，讓現在的開心感再延續一下。',
       );
@@ -48,14 +48,14 @@ class AiChatResult {
       return AiChatResult(
         reply: replies[random.nextInt(replies.length)],
         moodKey: 'calm',
-        actions: ['3 分鐘呼吸', '安靜鋼琴'],
+        actions: const ['3 分鐘呼吸', '安靜鋼琴'],
         musicTitle: '慢慢安定下來',
         musicDescription: '平穩的鋼琴和環境音，幫你把心裡的雜訊慢慢降下來。',
       );
     }
 
     if (hasAny(['難過', '低落', '傷心', '哭', 'sad', 'depressed', '失落'])) {
-      return AiChatResult(
+      return const AiChatResult(
         reply:
             '聽起來你今天心裡有一塊地方比較重。你不用急著把自己說服成「沒事」，有些情緒本來就需要被看見。\n\n我會陪你找一點溫柔、不吵的歌，不是要把難過趕走，而是讓你不用一個人扛著它。',
         moodKey: 'soft',
@@ -66,7 +66,7 @@ class AiChatResult {
     }
 
     if (hasAny(['累', '疲憊', '睡', '晚安', 'sleep', 'tired', 'exhausted'])) {
-      return AiChatResult(
+      return const AiChatResult(
         reply:
             '你現在比較像是身體和心都需要休息了。今天已經撐到這裡，其實就很不容易。\n\n先不要再要求自己產出什麼，讓音樂變得柔一點、慢一點，陪你把今天慢慢放下來。',
         moodKey: 'sleep',
@@ -77,7 +77,7 @@ class AiChatResult {
     }
 
     if (hasAny(['專心', '分心', '讀書', '工作', 'focus', 'study', 'coding'])) {
-      return AiChatResult(
+      return const AiChatResult(
         reply:
             '你現在不是不夠努力，比較像是注意力被太多東西切開了。先不用逼自己一次進入狀態，我們可以從一小段開始。\n\n我會幫你找節奏穩、存在感不太強的音樂，讓你比較容易回到手上的事情。',
         moodKey: 'focus',
@@ -87,7 +87,7 @@ class AiChatResult {
       );
     }
 
-    return AiChatResult(
+    return const AiChatResult(
       reply:
           '我有收到你的心情。你不需要把感受講得很完整才值得被理解，先照你現在的樣子待著就可以。\n\n我會先用比較溫柔、乾淨的音樂陪你，讓心情有一點空間可以慢慢整理。',
       moodKey: 'healing',
@@ -102,8 +102,8 @@ class AiService {
   static String get _apiKey => dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
 
   // 如果這個模型回 404 或 400，可以先改成 gemini-1.5-flash。
-  static String _model = 'gemini-2.5-flash';
-  static int _dailyLimit = 30;
+  static const String _model = 'gemini-2.5-flash';
+  static const int _dailyLimit = 30;
 
   Future<String> getMoodAdvice(String userMoodText) async {
     final result = await getMoodChat(userMoodText);
@@ -123,7 +123,7 @@ class AiService {
 
     final canUse = await _canUseToday();
     if (!canUse) {
-      return AiChatResult(
+      return const AiChatResult(
         reply:
             '今天的 AI 使用次數已經達到上限囉。為了避免超過免費額度，Moodify 今天先用本機陪伴模式回覆你。\n\n你可以先把現在最重的感覺交給音樂，不用急著處理完所有事情。',
         moodKey: 'healing',
@@ -363,7 +363,7 @@ $userMoodText
       dotAll: true,
     );
     final match = pattern.firstMatch(text);
-    if (match == null) return ['呼吸一下', '柔和音樂'];
+    if (match == null) return const ['呼吸一下', '柔和音樂'];
 
     final inside = match.group(1) ?? '';
     final itemPattern = RegExp(r'''(["'])(.*?)\1''', dotAll: true);
@@ -374,7 +374,7 @@ $userMoodText
         .take(2)
         .toList();
 
-    return items.isEmpty ? ['呼吸一下', '柔和音樂'] : items;
+    return items.isEmpty ? const ['呼吸一下', '柔和音樂'] : items;
   }
 
   String _cleanReplyText(String value) {
@@ -408,22 +408,22 @@ $userMoodText
   List<String> _defaultActions(String moodKey) {
     switch (moodKey) {
       case 'upbeat':
-        return ['開心歌單', '記下今天'];
+        return const ['開心歌單', '記下今天'];
       case 'soft':
-        return ['溫柔陪伴', '療癒木吉他'];
+        return const ['溫柔陪伴', '療癒木吉他'];
       case 'calm':
-        return ['3 分鐘呼吸', '安靜鋼琴'];
+        return const ['3 分鐘呼吸', '安靜鋼琴'];
       case 'sleep':
-        return ['睡前放鬆', '晚安白噪音'];
+        return const ['睡前放鬆', '晚安白噪音'];
       case 'focus':
-        return ['番茄鐘 25 分鐘', '專注鋼琴'];
+        return const ['番茄鐘 25 分鐘', '專注鋼琴'];
       default:
-        return ['呼吸一下', '柔和音樂'];
+        return const ['呼吸一下', '柔和音樂'];
     }
   }
 
   String _normalizeMoodKey(String value) {
-    final allowed = {'upbeat', 'soft', 'calm', 'sleep', 'focus', 'healing'};
+    const allowed = {'upbeat', 'soft', 'calm', 'sleep', 'focus', 'healing'};
     final key = value.trim().toLowerCase();
     return allowed.contains(key) ? key : 'healing';
   }

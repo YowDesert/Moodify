@@ -4,7 +4,6 @@ import '../widgets/moodify_bottom_nav_bar.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/app_theme_controller.dart';
 
 import '../services/firebase_mood_history_service.dart';
 import '../services/mood_history_service.dart';
@@ -17,20 +16,17 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
   final MoodHistoryService _historyService = MoodHistoryService();
   final FirebaseMoodHistoryService _firebaseHistoryService =
       FirebaseMoodHistoryService();
+
+  static const Color bgColor = Color(0xFFFAFAF7);
+  static const Color primaryColor = Color(0xFF3F7D5B);
+  static const Color softGreen = Color(0xFFEAF3EC);
+  static const Color textColor = Color(0xFF1F2522);
+  static const Color subTextColor = Color(0xFF747B76);
+  static const Color lineColor = Color(0xFFE8E5DE);
+  static const Color cardColor = Color(0xFFFFFEFB);
 
   late Future<List<Map<String, dynamic>>> _recordsFuture;
   List<Map<String, dynamic>> _allRecords = [];
@@ -73,7 +69,7 @@ class _HistoryPageState extends State<HistoryPage> {
     setState(_loadRecords);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('已刪除這筆心情紀錄'),
         behavior: SnackBarBehavior.floating,
       ),
@@ -82,16 +78,15 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColors = moodifyColors(MoodifyThemeController.instance.state);
     return Scaffold(
-      backgroundColor: themeColors.background,
+      backgroundColor: bgColor,
       body: SafeArea(
         bottom: false,
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _recordsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: primaryColor),
               );
             }
@@ -103,20 +98,20 @@ class _HistoryPageState extends State<HistoryPage> {
               onRefresh: _refreshRecords,
               color: primaryColor,
               child: ListView(
-                physics: AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(22, 18, 22, 120),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(22, 18, 22, 120),
                 children: [
                   _buildHeroHeader(),
-                  SizedBox(height: 22),
+                  const SizedBox(height: 22),
                   _buildSegmentedControl(),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   if (records.isEmpty) ...[
                     _buildEmptyState(),
                   ] else ...[
                     _buildTrendCard(records),
-                    SizedBox(height: 26),
+                    const SizedBox(height: 26),
                     _buildCalendarStrip(records),
-                    SizedBox(height: 26),
+                    const SizedBox(height: 26),
                     _buildRecentRecords(records),
                   ],
                 ],
@@ -125,7 +120,7 @@ class _HistoryPageState extends State<HistoryPage> {
           },
         ),
       ),
-      bottomNavigationBar: MoodifyBottomNavBar(
+      bottomNavigationBar: const MoodifyBottomNavBar(
         currentTab: MoodifyTab.history,
       ),
     );
@@ -136,7 +131,7 @@ class _HistoryPageState extends State<HistoryPage> {
       height: 140,
       child: Stack(
         children: [
-          Positioned(
+          const Positioned(
             right: -12,
             top: 6,
             child: Opacity(
@@ -149,7 +144,7 @@ class _HistoryPageState extends State<HistoryPage> {
             top: 14,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: const [
                 Text(
                   '紀錄',
                   style: TextStyle(
@@ -199,13 +194,13 @@ class _HistoryPageState extends State<HistoryPage> {
             width: 58,
             height: 58,
             decoration: BoxDecoration(
-              color: cardColor.withOpacity(0.78),
+              color: Colors.white.withOpacity(0.78),
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
                   blurRadius: 20,
-                  offset: Offset(0, 10),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
@@ -219,9 +214,9 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget _buildSegmentedControl() {
     return Container(
       height: 58,
-      padding: EdgeInsets.all(6),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.76),
+        color: Colors.white.withOpacity(0.76),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: lineColor),
       ),
@@ -238,7 +233,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: GestureDetector(
         onTap: () => setState(() => _selectedRange = index),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 220),
+          duration: const Duration(milliseconds: 220),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? primaryColor : Colors.transparent,
@@ -248,7 +243,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     BoxShadow(
                       color: primaryColor.withOpacity(0.22),
                       blurRadius: 16,
-                      offset: Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ]
                 : [],
@@ -277,7 +272,7 @@ class _HistoryPageState extends State<HistoryPage> {
     final countTitle = _selectedRange == 0 ? '本週紀錄' : '本月紀錄';
 
     return Container(
-      padding: EdgeInsets.fromLTRB(18, 20, 18, 16),
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
       decoration: _iosCardDecoration(radius: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +282,7 @@ class _HistoryPageState extends State<HistoryPage> {
               Expanded(
                 child: Text(
                   rangeTitle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -295,7 +290,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                 ),
               ),
-              Text(
+              const Text(
                 '心情分數 (0-10)',
                 style: TextStyle(
                   fontSize: 14,
@@ -305,15 +300,11 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
             ],
           ),
-          SizedBox(height: 18),
+          const SizedBox(height: 18),
           SizedBox(
             height: 196,
             child: CustomPaint(
-              painter: MoodTrendPainter(
-                points: points,
-                lineColor: lineColor,
-                primaryColor: primaryColor,
-              ),
+              painter: MoodTrendPainter(points: points),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(days.length, (index) {
@@ -337,7 +328,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             _selectedRange == 0
                                 ? _weekdayText(day)
                                 : '${day.month}/${day.day}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: subTextColor,
@@ -351,11 +342,11 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
             ),
           ),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           Container(
-            padding: EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              color: Color(0xFFFCFBF7),
+              color: const Color(0xFFFCFBF7),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(color: lineColor),
             ),
@@ -394,11 +385,11 @@ class _HistoryPageState extends State<HistoryPage> {
           BoxShadow(
             color: color.withOpacity(0.2),
             blurRadius: 14,
-            offset: Offset(0, 7),
+            offset: const Offset(0, 7),
           ),
         ],
       ),
-      child: Center(child: Text(emoji, style: TextStyle(fontSize: 22))),
+      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
     );
   }
 
@@ -408,7 +399,7 @@ class _HistoryPageState extends State<HistoryPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: primaryColor, size: 26),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,18 +408,18 @@ class _HistoryPageState extends State<HistoryPage> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: subTextColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: textColor,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -454,9 +445,9 @@ class _HistoryPageState extends State<HistoryPage> {
       children: [
         Row(
           children: [
-            Icon(Icons.eco_rounded, color: primaryColor, size: 24),
-            SizedBox(width: 8),
-            Expanded(
+            const Icon(Icons.eco_rounded, color: primaryColor, size: 24),
+            const SizedBox(width: 8),
+            const Expanded(
               child: Text(
                 '心情日曆',
                 style: TextStyle(
@@ -469,16 +460,16 @@ class _HistoryPageState extends State<HistoryPage> {
             GestureDetector(
               onTap: _showFullCalendarSheet,
               child: Container(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 9,
                 ),
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.86),
+                  color: Colors.white.withOpacity(0.86),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: lineColor),
                 ),
-                child: Text(
+                child: const Text(
                   '查看完整日曆',
                   style: TextStyle(
                     color: primaryColor,
@@ -490,15 +481,15 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
           ],
         ),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         Container(
-          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
           decoration: _iosCardDecoration(radius: 24),
           child: Row(
             children: [
               IconButton(
                 onPressed: () => setState(() => _weekOffset--),
-                icon: Icon(
+                icon: const Icon(
                   Icons.chevron_left_rounded,
                   color: subTextColor,
                 ),
@@ -513,8 +504,8 @@ class _HistoryPageState extends State<HistoryPage> {
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedDay = day),
                     child: AnimatedContainer(
-                      duration: Duration(milliseconds: 180),
-                      padding: EdgeInsets.symmetric(vertical: 6),
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       decoration: BoxDecoration(
                         color: selected ? softGreen : Colors.transparent,
                         borderRadius: BorderRadius.circular(18),
@@ -523,16 +514,16 @@ class _HistoryPageState extends State<HistoryPage> {
                         children: [
                           Text(
                             _weekdayText(day),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               color: subTextColor,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Container(
                             padding: today
-                                ? EdgeInsets.symmetric(
+                                ? const EdgeInsets.symmetric(
                                     horizontal: 12,
                                     vertical: 5,
                                   )
@@ -552,8 +543,8 @@ class _HistoryPageState extends State<HistoryPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Text(emoji, style: TextStyle(fontSize: 20)),
+                          const SizedBox(height: 10),
+                          Text(emoji, style: const TextStyle(fontSize: 20)),
                         ],
                       ),
                     ),
@@ -562,7 +553,7 @@ class _HistoryPageState extends State<HistoryPage> {
               }),
               IconButton(
                 onPressed: () => setState(() => _weekOffset++),
-                icon: Icon(
+                icon: const Icon(
                   Icons.chevron_right_rounded,
                   color: subTextColor,
                 ),
@@ -584,7 +575,7 @@ class _HistoryPageState extends State<HistoryPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: [
+          children: const [
             Icon(Icons.article_outlined, color: primaryColor, size: 25),
             SizedBox(width: 9),
             Text(
@@ -597,7 +588,7 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
           ],
         ),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         if (displayRecords.isEmpty)
           _buildNoRecordForDay()
         else
@@ -618,16 +609,16 @@ class _HistoryPageState extends State<HistoryPage> {
               context: context,
               builder: (context) {
                 return AlertDialog(
-                  title: Text('刪除這筆紀錄？'),
-                  content: Text('這只會刪除你選擇的這一筆心情紀錄。'),
+                  title: const Text('刪除這筆紀錄？'),
+                  content: const Text('這只會刪除你選擇的這一筆心情紀錄。'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text('取消'),
+                      child: const Text('取消'),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(
+                      child: const Text(
                         '刪除',
                         style: TextStyle(color: Colors.red),
                       ),
@@ -640,14 +631,14 @@ class _HistoryPageState extends State<HistoryPage> {
       },
       onDismissed: (_) => _deleteRecord(record),
       background: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        padding: EdgeInsets.only(right: 22),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(right: 22),
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color: Color(0xFFFF3B30),
+          color: const Color(0xFFFF3B30),
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Icon(Icons.delete_rounded, color: Colors.white),
+        child: const Icon(Icons.delete_rounded, color: Colors.white),
       ),
       child: _buildRecordCard(record),
     );
@@ -664,8 +655,8 @@ class _HistoryPageState extends State<HistoryPage> {
     return GestureDetector(
       onTap: () => _showRecordDetail(record),
       child: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        padding: EdgeInsets.fromLTRB(12, 12, 14, 12),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
         decoration: _iosCardDecoration(radius: 22),
         child: Row(
           children: [
@@ -677,10 +668,10 @@ class _HistoryPageState extends State<HistoryPage> {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Center(
-                child: Text(emoji, style: TextStyle(fontSize: 34)),
+                child: Text(emoji, style: const TextStyle(fontSize: 34)),
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -689,24 +680,24 @@ class _HistoryPageState extends State<HistoryPage> {
                     children: [
                       Text(
                         _shortDate(date),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
                           color: textColor,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Text(
                         time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           color: subTextColor,
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 6,
                         ),
@@ -716,7 +707,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         ),
                         child: Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: textColor,
@@ -725,14 +716,14 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 9),
+                  const SizedBox(height: 9),
                   Text(
                     keyword.toString().trim().isEmpty
                         ? '今天的心情是$title，記得溫柔照顧自己。'
                         : keyword.toString(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       height: 1.25,
                       fontWeight: FontWeight.w500,
@@ -742,7 +733,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 ],
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Container(
               width: 38,
               height: 38,
@@ -753,11 +744,11 @@ class _HistoryPageState extends State<HistoryPage> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 14,
-                    offset: Offset(0, 6),
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.chevron_right_rounded,
                 color: primaryColor,
               ),
@@ -770,10 +761,10 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 44),
       decoration: _iosCardDecoration(radius: 30),
       child: Column(
-        children: [
+        children: const [
           Icon(Icons.eco_rounded, color: primaryColor, size: 62),
           SizedBox(height: 18),
           Text(
@@ -803,9 +794,9 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget _buildNoRecordForDay() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(22),
+      padding: const EdgeInsets.all(22),
       decoration: _iosCardDecoration(radius: 24),
-      child: Text(
+      child: const Text(
         '這一天還沒有紀錄',
         textAlign: TextAlign.center,
         style: TextStyle(
@@ -829,8 +820,8 @@ class _HistoryPageState extends State<HistoryPage> {
       isScrollControlled: true,
       builder: (context) {
         return Container(
-          padding: EdgeInsets.fromLTRB(20, 18, 20, 28),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+          decoration: const BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
@@ -842,38 +833,38 @@ class _HistoryPageState extends State<HistoryPage> {
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_month_rounded,
                       color: primaryColor,
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Text(
                       '${now.month} 月心情日曆',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                         color: textColor,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close_rounded),
+                      icon: const Icon(Icons.close_rounded),
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 GridView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: blankDays + daysInMonth,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 7,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                   ),
                   itemBuilder: (context, index) {
-                    if (index < blankDays) return SizedBox.shrink();
+                    if (index < blankDays) return const SizedBox.shrink();
                     final day = DateTime(
                       now.year,
                       now.month,
@@ -904,10 +895,10 @@ class _HistoryPageState extends State<HistoryPage> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
                               record?['emoji'] ?? '—',
-                              style: TextStyle(fontSize: 14),
+                              style: const TextStyle(fontSize: 14),
                             ),
                           ],
                         ),
@@ -934,8 +925,8 @@ class _HistoryPageState extends State<HistoryPage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(22, 22, 22, 26),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
+        decoration: const BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
@@ -947,12 +938,12 @@ class _HistoryPageState extends State<HistoryPage> {
             children: [
               Row(
                 children: [
-                  Text(emoji, style: TextStyle(fontSize: 42)),
-                  SizedBox(width: 14),
+                  Text(emoji, style: const TextStyle(fontSize: 42)),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Text(
                       title.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
                         color: textColor,
@@ -961,28 +952,28 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 '$date  $time',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   color: subTextColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
                 keyword.toString().trim().isEmpty
                     ? '今天的心情是$title，記得溫柔照顧自己。'
                     : keyword.toString(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 17,
                   height: 1.5,
                   color: textColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -998,8 +989,8 @@ class _HistoryPageState extends State<HistoryPage> {
                     Navigator.pop(context);
                     _deleteRecord(record);
                   },
-                  icon: Icon(Icons.delete_outline_rounded),
-                  label: Text(
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: const Text(
                     '刪除這筆紀錄',
                     style: TextStyle(fontWeight: FontWeight.w900),
                   ),
@@ -1141,10 +1132,10 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Color _moodColor(Map<String, dynamic>? record) {
-    if (record == null) return Color(0xFFC9D8C8);
+    if (record == null) return const Color(0xFFC9D8C8);
     final value = record['color'];
     if (value is int) return Color(value);
-    return Color(0xFF95D5B2);
+    return const Color(0xFF95D5B2);
   }
 
   BoxDecoration _iosCardDecoration({double radius = 22}) {
@@ -1156,7 +1147,7 @@ class _HistoryPageState extends State<HistoryPage> {
         BoxShadow(
           color: Colors.black.withOpacity(0.035),
           blurRadius: 24,
-          offset: Offset(0, 12),
+          offset: const Offset(0, 12),
         ),
       ],
     );
@@ -1165,14 +1156,8 @@ class _HistoryPageState extends State<HistoryPage> {
 
 class MoodTrendPainter extends CustomPainter {
   final List<double?> points;
-  final Color lineColor;
-  final Color primaryColor;
 
-  MoodTrendPainter({
-    required this.points,
-    required this.lineColor,
-    required this.primaryColor,
-  });
+  MoodTrendPainter({required this.points});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1182,7 +1167,7 @@ class MoodTrendPainter extends CustomPainter {
     final step = size.width / math.max(points.length - 1, 1);
 
     final gridPaint = Paint()
-      ..color = lineColor
+      ..color = const Color(0xFFE8E5DE)
       ..strokeWidth = 1;
 
     for (final ratio in [0.0, 0.5, 1.0]) {
@@ -1222,16 +1207,16 @@ class MoodTrendPainter extends CustomPainter {
       ..close();
 
     final fillPaint = Paint()
-      ..shader = LinearGradient(
+      ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [primaryColor.withOpacity(0.25), primaryColor.withOpacity(0.0)],
+        colors: [Color(0x553F7D5B), Color(0x00FFFFFF)],
       ).createShader(Rect.fromLTWH(0, chartTop, size.width, chartHeight));
 
     canvas.drawPath(fillPath, fillPaint);
 
     final linePaint = Paint()
-      ..color = primaryColor
+      ..color = const Color(0xFF6E9A80)
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -1255,8 +1240,6 @@ class MoodTrendPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant MoodTrendPainter oldDelegate) {
-    return oldDelegate.points != points ||
-        oldDelegate.lineColor != lineColor ||
-        oldDelegate.primaryColor != primaryColor;
+    return oldDelegate.points != points;
   }
 }

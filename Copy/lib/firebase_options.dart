@@ -40,7 +40,7 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static FirebaseOptions web = FirebaseOptions(
+  static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDnE46HhChKV9eyKCq0XngqAXHKsPE6yrA',
     appId: '1:642198949669:web:f4f15d7d13fb5c02a6d4cc',
     messagingSenderId: '642198949669',
@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
     measurementId: 'G-EWZ59WQD5Q',
   );
 
-  static FirebaseOptions android = FirebaseOptions(
+  static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA6eOUDlvajW4uZdtRLsCYsteMRqXSoB20',
     appId: '1:642198949669:android:cd14a602ab319486a6d4cc',
     messagingSenderId: '642198949669',
@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'moodify-c632b.firebasestorage.app',
   );
 
-  static FirebaseOptions ios = FirebaseOptions(
+  static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBkFB1xpuabJq0wG75wGqR0twTNdInd_A8',
     appId: '1:642198949669:ios:6d207ec9171edd07a6d4cc',
     messagingSenderId: '642198949669',
@@ -68,7 +68,7 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.moodifyApp',
   );
 
-  static FirebaseOptions macos = FirebaseOptions(
+  static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBkFB1xpuabJq0wG75wGqR0twTNdInd_A8',
     appId: '1:642198949669:ios:6d207ec9171edd07a6d4cc',
     messagingSenderId: '642198949669',
@@ -78,7 +78,7 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.moodifyApp',
   );
 
-  static FirebaseOptions windows = FirebaseOptions(
+  static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDnE46HhChKV9eyKCq0XngqAXHKsPE6yrA',
     appId: '1:642198949669:web:0b3c744ee3aaea69a6d4cc',
     messagingSenderId: '642198949669',

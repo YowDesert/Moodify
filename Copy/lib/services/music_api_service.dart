@@ -9,8 +9,8 @@ import '../models/song.dart';
 class MusicApiService {
   final Random _random = Random();
 
-  static String _recentSongKey = 'recent_recommended_songs';
-  static int _recentKeepCount = 80;
+  static const String _recentSongKey = 'recent_recommended_songs';
+  static const int _recentKeepCount = 80;
 
   Future<List<Song>> searchSongs(String moodKeyword) async {
     final searchTerms = _pickSearchTerms(moodKeyword);
@@ -63,7 +63,7 @@ class MusicApiService {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final results = (data['results'] as List?) ?? [];
+    final results = (data['results'] as List?) ?? const [];
 
     final songs = results
         .whereType<Map<String, dynamic>>()
@@ -165,7 +165,7 @@ class MusicApiService {
         .toList();
   }
 
-  static Map<String, List<List<String>>> _fallbackSongData = {
+  static const Map<String, List<List<String>>> _fallbackSongData = {
     'upbeat': [
       ['Treasure', 'Bruno Mars'],
       ['Levitating', 'Dua Lipa'],
@@ -238,7 +238,7 @@ class MusicApiService {
     ],
   };
 
-  static Map<String, List<String>> _moodSearchTerms = {
+  static const Map<String, List<String>> _moodSearchTerms = {
     'upbeat': [
       'happy pop',
       'feel good pop',

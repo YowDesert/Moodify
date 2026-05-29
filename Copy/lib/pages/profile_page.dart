@@ -21,17 +21,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
   final AuthService _authService = AuthService();
   final SyncService _syncService = SyncService();
 
@@ -40,6 +29,15 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isLoadingStats = true;
   bool bedtimeRelax = true;
   bool morningMusic = true;
+
+  static const Color bgColor = Color(0xFFFAFBF7);
+  static const Color primaryColor = Color(0xFF2E6F52);
+  static const Color deepGreen = Color(0xFF174632);
+  static const Color textColor = Color(0xFF24312A);
+  static const Color subTextColor = Color(0xFF7A817B);
+  static const Color lineColor = Color(0xFFE8E6DD);
+  static const Color softGreen = Color(0xFFEAF3EA);
+  static const Color cardColor = Color(0xFFFFFEFA);
 
   @override
   void initState() {
@@ -90,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('登入成功，已同步本機資料到雲端'),
             behavior: SnackBarBehavior.floating,
           ),
@@ -116,16 +114,16 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          title: Text('登出 Moodify？'),
-          content: Text('登出後，雲端收藏與心情紀錄需要重新登入才會顯示。'),
+          title: const Text('登出 Moodify？'),
+          content: const Text('登出後，雲端收藏與心情紀錄需要重新登入才會顯示。'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('取消'),
+              child: const Text('取消'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('登出', style: TextStyle(color: Colors.red)),
+              child: const Text('登出', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -138,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('已登出 Google 帳號'),
           behavior: SnackBarBehavior.floating,
         ),
@@ -155,17 +153,15 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context, snapshot) {
         final user = snapshot.data;
 
-        final themeColors = moodifyColors(MoodifyThemeController.instance.state);
-
         return Scaffold(
-          backgroundColor: themeColors.background,
+          backgroundColor: bgColor,
           body: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  themeColors.background,
-                  themeColors.background2,
-                  themeColors.card,
+                  Color(0xFFFEFEFA),
+                  Color(0xFFF8FAF4),
+                  Color(0xFFFFFFFF),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -174,32 +170,32 @@ class _ProfilePageState extends State<ProfilePage> {
             child: SafeArea(
               child: RefreshIndicator(
                 onRefresh: _refreshPage,
-                color: themeColors.primary,
+                color: primaryColor,
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 120),
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
                   children: [
                     _buildHeader(),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     user == null
                         ? _buildGuestProfileCard()
                         : _buildUserProfileCard(user),
-                    SizedBox(height: 28),
+                    const SizedBox(height: 28),
                     _buildSectionTitle('偏好設定'),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildPreferenceCard(user),
-                    SizedBox(height: 28),
+                    const SizedBox(height: 28),
                     _buildSectionTitle('我的習慣'),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildHabitCards(),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     user == null ? _buildLoginButton() : _buildLogoutButton(),
-                    SizedBox(height: 26),
+                    const SizedBox(height: 26),
                   ],
                 ),
               ),
             ),
           ),
-          bottomNavigationBar: MoodifyBottomNavBar(currentTab: MoodifyTab.profile),
+          bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.profile),
         );
       },
     );
@@ -221,7 +217,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -254,12 +250,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.92),
+                  color: Colors.white.withOpacity(0.92),
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: _softShadow(opacity: 0.08, blur: 20),
-                  border: Border.all(color: lineColor, width: 1.2),
+                  border: Border.all(color: Colors.white, width: 1.2),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.music_note_rounded,
                   color: primaryColor,
                   size: 30,
@@ -273,7 +269,7 @@ class _ProfilePageState extends State<ProfilePage> {
           top: 30,
           child: Icon(
             Icons.auto_awesome_rounded,
-            color: Color(0xFFD8C98E).withOpacity(0.65),
+            color: const Color(0xFFD8C98E).withOpacity(0.65),
             size: 16,
           ),
         ),
@@ -313,15 +309,15 @@ class _ProfilePageState extends State<ProfilePage> {
       onTap: showCloudBadge ? _showAccountSheet : _signIn,
       borderRadius: BorderRadius.circular(34),
       child: Container(
-      padding: EdgeInsets.fromLTRB(18, 20, 18, 18),
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
-        gradient: LinearGradient(
-          colors: [cardColor, Color(0xFFF0F6ED)],
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFF0F6ED)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: lineColor, width: 1.3),
+        border: Border.all(color: Colors.white, width: 1.3),
         boxShadow: _softShadow(opacity: 0.10, blur: 28, y: 14),
       ),
       child: Stack(
@@ -352,7 +348,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 children: [
                   _buildAvatar(photoUrl),
-                  SizedBox(width: 18),
+                  const SizedBox(width: 18),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +360,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 1.2,
@@ -372,15 +368,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Container(
                               width: 26,
                               height: 26,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Color(0xFF78A785),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.eco_rounded,
                                 color: Colors.white,
                                 size: 15,
@@ -388,12 +384,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15,
                             color: subTextColor,
                             fontWeight: FontWeight.w600,
@@ -402,12 +398,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Container(
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: cardColor.withOpacity(0.88),
+                      color: Colors.white.withOpacity(0.88),
                       shape: BoxShape.circle,
                       boxShadow: _softShadow(opacity: 0.07, blur: 14, y: 6),
                     ),
@@ -421,7 +417,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 22),
+              const SizedBox(height: 22),
               Row(
                 children: [
                   Expanded(
@@ -436,7 +432,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _buildMiniStatCard(
                       icon: Icons.calendar_month_rounded,
@@ -449,7 +445,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _buildMiniStatCard(
                       icon: Icons.smart_toy_outlined,
@@ -482,10 +478,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       width: 92,
       height: 92,
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFFE6F0DE), Color(0xFFFAF5DF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -493,9 +489,9 @@ class _ProfilePageState extends State<ProfilePage> {
         boxShadow: _softShadow(opacity: 0.08, blur: 18, y: 8),
       ),
       child: CircleAvatar(
-        backgroundColor: Color(0xFFE8F3E6),
+        backgroundColor: const Color(0xFFE8F3E6),
         backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-        child: photoUrl == null ? _SoftAvatarFace() : null,
+        child: photoUrl == null ? const _SoftAvatarFace() : null,
       ),
     );
   }
@@ -513,11 +509,11 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Container(
       // 原本 88 在部分 Android 模擬器上會差幾 px，導致底部 RenderFlex overflow。
       height: 104,
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
       decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.84),
+        color: Colors.white.withOpacity(0.84),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: lineColor, width: 1),
+        border: Border.all(color: Colors.white, width: 1),
         boxShadow: _softShadow(opacity: 0.06, blur: 16, y: 8),
       ),
       child: Column(
@@ -525,20 +521,20 @@ class _ProfilePageState extends State<ProfilePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: primaryColor, size: 24),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               height: 1.0,
               color: textColor,
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 7),
+          const SizedBox(height: 7),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: RichText(
@@ -547,7 +543,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   TextSpan(
                     text: value,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 22,
                       height: 1.0,
                       color: deepGreen,
@@ -557,7 +553,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   TextSpan(
                     text: unit.isEmpty ? '' : ' $unit',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       height: 1.0,
                       color: textColor,
@@ -582,10 +578,10 @@ class _ProfilePageState extends State<ProfilePage> {
           color: primaryColor.withOpacity(0.72),
           size: 23,
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w800,
             color: textColor,
@@ -646,7 +642,7 @@ class _ProfilePageState extends State<ProfilePage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(26),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 17),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
         child: Row(
           children: [
             Container(
@@ -659,11 +655,11 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Icon(icon, color: primaryColor, size: 24),
             ),
-            SizedBox(width: 18),
+            const SizedBox(width: 18),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 19,
                   color: textColor,
                   fontWeight: FontWeight.w700,
@@ -671,7 +667,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            Icon(
+            const Icon(
               Icons.chevron_right_rounded,
               color: Color(0xFF8B8F8B),
               size: 30,
@@ -691,23 +687,23 @@ class _ProfilePageState extends State<ProfilePage> {
             line1: '每天睡前 15 分鐘',
             line2: '放鬆身心',
             icon: Icons.nightlight_round,
-            iconColor: Color(0xFF9C8ED0),
-            bg1: Color(0xFFF8F5FF),
-            bg2: cardColor,
+            iconColor: const Color(0xFF9C8ED0),
+            bg1: const Color(0xFFF8F5FF),
+            bg2: const Color(0xFFFFFFFF),
             value: bedtimeRelax,
             onChanged: (v) => setState(() => bedtimeRelax = v),
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _buildHabitCard(
             title: '晨間音樂',
             line1: '每天早晨聽音樂',
             line2: '開啟美好的一天',
             icon: Icons.wb_sunny_rounded,
-            iconColor: Color(0xFFE5B452),
-            bg1: Color(0xFFFFF7E8),
-            bg2: cardColor,
+            iconColor: const Color(0xFFE5B452),
+            bg1: const Color(0xFFFFF7E8),
+            bg2: const Color(0xFFFFFFFF),
             value: morningMusic,
             onChanged: (v) => setState(() => morningMusic = v),
           ),
@@ -729,7 +725,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }) {
     return Container(
       height: 148,
-      padding: EdgeInsets.fromLTRB(14, 14, 12, 12),
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
@@ -737,7 +733,7 @@ class _ProfilePageState extends State<ProfilePage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: lineColor, width: 1.2),
+        border: Border.all(color: Colors.white, width: 1.2),
         boxShadow: _softShadow(opacity: 0.07, blur: 18, y: 8),
       ),
       child: Stack(
@@ -767,47 +763,47 @@ class _ProfilePageState extends State<ProfilePage> {
                 value: value,
                 activeColor: Colors.white,
                 activeTrackColor: primaryColor.withOpacity(0.78),
-                inactiveTrackColor: Color(0xFFE3E3E3),
+                inactiveTrackColor: const Color(0xFFE3E3E3),
                 onChanged: onChanged,
               ),
             ),
           ),
 
           Padding(
-            padding: EdgeInsets.only(left: 56, right: 8),
+            padding: const EdgeInsets.only(left: 56, right: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: textColor,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   line1,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     color: subTextColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Padding(
-                  padding: EdgeInsets.only(right: 46),
+                  padding: const EdgeInsets.only(right: 46),
                   child: Text(
                     line2,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 11,
                       color: subTextColor,
                       fontWeight: FontWeight.w600,
@@ -830,7 +826,7 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         _infoLine('名稱', user?.displayName ?? 'User Ai'),
         _infoLine('Email', user?.email ?? '尚未登入'),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         _sheetActionButton('重新整理統計', Icons.refresh_rounded, () async {
           Navigator.pop(context);
           await _loadStats();
@@ -844,8 +840,8 @@ class _ProfilePageState extends State<ProfilePage> {
       title: '音樂偏好',
       icon: Icons.music_note_rounded,
       children: [
-        Text('選擇你平常最想用音樂照顧的心情。', style: TextStyle(color: subTextColor, fontWeight: FontWeight.w600)),
-        SizedBox(height: 16),
+        const Text('選擇你平常最想用音樂照顧的心情。', style: TextStyle(color: subTextColor, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -853,7 +849,7 @@ class _ProfilePageState extends State<ProfilePage> {
               .map((mood) => ActionChip(
                     label: Text(mood),
                     backgroundColor: softGreen,
-                    labelStyle: TextStyle(color: deepGreen, fontWeight: FontWeight.w800),
+                    labelStyle: const TextStyle(color: deepGreen, fontWeight: FontWeight.w800),
                     onPressed: () {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('已設定音樂偏好：$mood'), behavior: SnackBarBehavior.floating));
@@ -873,8 +869,8 @@ class _ProfilePageState extends State<ProfilePage> {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           activeColor: primaryColor,
-          title: Text('睡前放鬆提醒', style: TextStyle(fontWeight: FontWeight.w800)),
-          subtitle: Text('每天晚上提醒你記錄心情'),
+          title: const Text('睡前放鬆提醒', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('每天晚上提醒你記錄心情'),
           value: bedtimeRelax,
           onChanged: (value) {
             setState(() => bedtimeRelax = value);
@@ -884,8 +880,8 @@ class _ProfilePageState extends State<ProfilePage> {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           activeColor: primaryColor,
-          title: Text('晨間音樂提醒', style: TextStyle(fontWeight: FontWeight.w800)),
-          subtitle: Text('早上推薦適合今天的音樂'),
+          title: const Text('晨間音樂提醒', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('早上推薦適合今天的音樂'),
           value: morningMusic,
           onChanged: (value) {
             setState(() => morningMusic = value);
@@ -898,194 +894,66 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   void _showThemeSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) {
-        return ValueListenableBuilder<MoodifyThemeState>(
+    _showInfoSheet(
+      title: '外觀與天氣主題',
+      icon: Icons.dark_mode_outlined,
+      children: [
+        ValueListenableBuilder<MoodifyThemeState>(
           valueListenable: MoodifyThemeController.instance.notifier,
           builder: (context, themeState, _) {
-            final colors = moodifyColors(themeState);
             final weatherTemp = themeState.temperature == null
                 ? ''
                 : '・${themeState.temperature!.toStringAsFixed(0)}°C';
 
-            return Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.86,
-              ),
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 26),
-              decoration: BoxDecoration(
-                color: colors.card,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                border: Border.all(color: colors.line),
-              ),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: colors.soft,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.palette_rounded, color: colors.primary),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '外觀與主題',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                    color: colors.text,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  '夜間模式、天氣模式、手動主題已分開',
-                                  style: TextStyle(
-                                    color: colors.subText,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 18),
-                      Text('外觀模式', style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.w900)),
-                      SizedBox(height: 10),
-                      _themeChoiceTileV2(
-                        colors: colors,
-                        icon: Icons.light_mode_outlined,
-                        title: '淺色模式',
-                        subtitle: '清新綠、明亮、乾淨',
-                        selected: themeState.mode == MoodifyThemeMode.light,
-                        onTap: () => MoodifyThemeController.instance.setMode(MoodifyThemeMode.light),
-                      ),
-                      _themeChoiceTileV2(
-                        colors: colors,
-                        icon: Icons.dark_mode_outlined,
-                        title: '深色模式',
-                        subtitle: '獨立夜間模式，不跟天氣混在一起',
-                        selected: themeState.mode == MoodifyThemeMode.dark,
-                        onTap: () => MoodifyThemeController.instance.setMode(MoodifyThemeMode.dark),
-                      ),
-                      _themeChoiceTileV2(
-                        colors: colors,
-                        icon: moodifyColors(themeState.copyWith(mode: MoodifyThemeMode.weather)).weatherIcon,
-                        title: '依天氣自動換主題',
-                        subtitle: '目前台北：${themeState.weatherLabel}$weatherTemp',
-                        selected: themeState.mode == MoodifyThemeMode.weather,
-                        onTap: () => MoodifyThemeController.instance.setMode(MoodifyThemeMode.weather),
-                      ),
-                      SizedBox(height: 18),
-                      Text('手動選擇主題', style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.w900)),
-                      SizedBox(height: 10),
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 2.35,
-                        children: MoodifyCustomTheme.values.map((theme) {
-                          final preview = moodifyPreviewColors(theme);
-                          final selected = themeState.mode == MoodifyThemeMode.custom && themeState.customTheme == theme;
-                          return InkWell(
-                            onTap: () => MoodifyThemeController.instance.setCustomTheme(theme),
-                            borderRadius: BorderRadius.circular(18),
-                            child: AnimatedContainer(
-                              duration: Duration(milliseconds: 180),
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: selected ? colors.soft : colors.background.withOpacity(0.55),
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: selected ? colors.primary.withOpacity(0.65) : colors.line,
-                                  width: selected ? 1.4 : 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: [preview.primary.withOpacity(0.75), preview.background2],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      border: Border.all(color: preview.line),
-                                    ),
-                                    child: Icon(preview.weatherIcon, size: 18, color: preview.primary),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          preview.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(color: colors.text, fontWeight: FontWeight.w900, fontSize: 13),
-                                        ),
-                                        Text(
-                                          preview.description,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(color: colors.subText, fontWeight: FontWeight.w600, fontSize: 10.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (selected) Icon(Icons.check_circle_rounded, color: colors.primary, size: 18),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        '天氣主題只依照天氣狀態換色：晴天是暖黃、下雨是藍色、多雲是灰藍、雷雨是紫藍、霧天是灰色、降雪是冰藍；不會再因為晚上就自動變成深色模式。',
-                        style: TextStyle(
-                          color: colors.subText,
-                          height: 1.45,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _themeChoiceTile(
+                  icon: Icons.light_mode_outlined,
+                  title: '淺色模式',
+                  subtitle: '清新綠、明亮、乾淨',
+                  selected: themeState.mode == MoodifyThemeMode.light,
+                  onTap: () => MoodifyThemeController.instance.setMode(
+                    MoodifyThemeMode.light,
                   ),
                 ),
-              ),
+                _themeChoiceTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: '深色模式',
+                  subtitle: '夜晚使用比較舒服',
+                  selected: themeState.mode == MoodifyThemeMode.dark,
+                  onTap: () => MoodifyThemeController.instance.setMode(
+                    MoodifyThemeMode.dark,
+                  ),
+                ),
+                _themeChoiceTile(
+                  icon: moodifyColors(themeState).weatherIcon,
+                  title: '依天氣自動換主題',
+                  subtitle: '目前台北：${themeState.weatherLabel}$weatherTemp',
+                  selected: themeState.mode == MoodifyThemeMode.weather,
+                  onTap: () => MoodifyThemeController.instance.setMode(
+                    MoodifyThemeMode.weather,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '目前先使用台北天氣。如果你之後要改成定位，可再接 geolocator 取得使用者經緯度。',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: subTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 
-  Widget _themeChoiceTileV2({
-    required MoodifyThemeColors colors,
+  Widget _themeChoiceTile({
     required IconData icon,
     required String title,
     required String subtitle,
@@ -1093,29 +961,35 @@ class _ProfilePageState extends State<ProfilePage> {
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: selected ? colors.soft : colors.background.withOpacity(0.55),
+        color: selected ? softGreen : Colors.white.withOpacity(0.72),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: selected ? colors.primary.withOpacity(0.55) : colors.line,
+          color: selected ? primaryColor.withOpacity(0.55) : lineColor,
           width: 1,
         ),
       ),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(icon, color: colors.primary),
+        leading: Icon(icon, color: primaryColor),
         title: Text(
           title,
-          style: TextStyle(color: colors.text, fontWeight: FontWeight.w900),
+          style: const TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w900,
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(color: colors.subText, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: subTextColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         trailing: Icon(
           selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-          color: selected ? colors.primary : colors.subText,
+          color: selected ? primaryColor : subTextColor,
         ),
       ),
     );
@@ -1128,7 +1002,7 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         _infoLine('模式', '溫柔陪伴'),
         _infoLine('語氣', '像朋友一樣聊天'),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         _sheetActionButton('打開 AI 聊天', Icons.chat_bubble_outline_rounded, () {
           Navigator.pop(context);
           Navigator.push(context, MaterialPageRoute(builder: (_) => const AiChatPage()));
@@ -1145,7 +1019,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _infoLine('儲存位置', user == null ? '本機資料' : 'Firebase 雲端同步'),
         _infoLine('收藏數', '$favoriteCount 首'),
         _infoLine('心情紀錄', '$historyCount 筆'),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         _sheetActionButton('重新整理資料', Icons.refresh_rounded, () async {
           Navigator.pop(context);
           await _loadStats();
@@ -1159,8 +1033,8 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(22, 18, 22, 26),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.fromLTRB(22, 18, 22, 26),
+        decoration: const BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
@@ -1171,11 +1045,11 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                Container(width: 42, height: 42, decoration: BoxDecoration(color: softGreen, shape: BoxShape.circle), child: Icon(icon, color: primaryColor)),
-                SizedBox(width: 12),
-                Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+                Container(width: 42, height: 42, decoration: const BoxDecoration(color: softGreen, shape: BoxShape.circle), child: Icon(icon, color: primaryColor)),
+                const SizedBox(width: 12),
+                Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
               ]),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               ...children,
             ],
           ),
@@ -1186,11 +1060,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _infoLine(String label, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          SizedBox(width: 86, child: Text(label, style: TextStyle(color: subTextColor, fontWeight: FontWeight.w700))),
-          Expanded(child: Text(value, style: TextStyle(color: textColor, fontWeight: FontWeight.w800))),
+          SizedBox(width: 86, child: Text(label, style: const TextStyle(color: subTextColor, fontWeight: FontWeight.w700))),
+          Expanded(child: Text(value, style: const TextStyle(color: textColor, fontWeight: FontWeight.w800))),
         ],
       ),
     );
@@ -1204,7 +1078,7 @@ class _ProfilePageState extends State<ProfilePage> {
         style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
         onPressed: onTap,
         icon: Icon(icon),
-        label: Text(title, style: TextStyle(fontWeight: FontWeight.w900)),
+        label: Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
       ),
     );
   }
@@ -1214,7 +1088,7 @@ class _ProfilePageState extends State<ProfilePage> {
       height: 58,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF78A785), Color(0xFF2E6F52)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -1226,7 +1100,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(22),
           onTap: () {},
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
@@ -1271,7 +1145,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 54,
               ),
             ),
-            Center(
+            const Center(
               child: Text(
                 '使用 Google 登入',
                 style: TextStyle(
@@ -1319,7 +1193,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 58,
               ),
             ),
-            Center(
+            const Center(
               child: Text(
                 '登出',
                 style: TextStyle(
@@ -1338,7 +1212,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildThinDivider() {
     return Padding(
-      padding: EdgeInsets.only(left: 80, right: 24),
+      padding: const EdgeInsets.only(left: 80, right: 24),
       child: Divider(
         height: 1,
         thickness: 0.8,
@@ -1351,7 +1225,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return BoxDecoration(
       color: cardColor.withOpacity(0.95),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: lineColor, width: 1.2),
+      border: Border.all(color: Colors.white, width: 1.2),
       boxShadow: _softShadow(opacity: 0.07, blur: 18, y: 8),
     );
   }
@@ -1363,7 +1237,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }) {
     return [
       BoxShadow(
-        color: Color(0xFF2E6F52).withOpacity(opacity),
+        color: const Color(0xFF2E6F52).withOpacity(opacity),
         blurRadius: blur,
         offset: Offset(0, y),
       ),
@@ -1377,7 +1251,7 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 class _SoftAvatarFace extends StatelessWidget {
-  _SoftAvatarFace();
+  const _SoftAvatarFace();
 
   @override
   Widget build(BuildContext context) {
@@ -1389,7 +1263,7 @@ class _SoftAvatarFace extends StatelessWidget {
           child: Container(
             width: 48,
             height: 32,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFFF2E5CE),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24),
@@ -1405,7 +1279,7 @@ class _SoftAvatarFace extends StatelessWidget {
           child: Container(
             width: 52,
             height: 52,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFF9C8566),
               shape: BoxShape.circle,
             ),
@@ -1416,11 +1290,11 @@ class _SoftAvatarFace extends StatelessWidget {
           child: Container(
             width: 42,
             height: 42,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFFF4DCC7),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.sentiment_satisfied_alt_rounded,
               size: 25,
               color: Color(0xFF5E6E58),
@@ -1433,7 +1307,7 @@ class _SoftAvatarFace extends StatelessWidget {
           child: Icon(
             Icons.eco_rounded,
             size: 24,
-            color: Color(0xFF2E6F52).withOpacity(0.35),
+            color: const Color(0xFF2E6F52).withOpacity(0.35),
           ),
         ),
         Positioned(
@@ -1442,7 +1316,7 @@ class _SoftAvatarFace extends StatelessWidget {
           child: Icon(
             Icons.auto_awesome_rounded,
             size: 14,
-            color: Color(0xFFD8C98E).withOpacity(0.85),
+            color: const Color(0xFFD8C98E).withOpacity(0.85),
           ),
         ),
       ],

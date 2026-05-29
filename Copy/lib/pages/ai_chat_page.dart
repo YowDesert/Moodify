@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/app_theme_controller.dart';
 import '../widgets/moodify_bottom_nav_bar.dart';
 
 import '../services/ai_service.dart';
@@ -21,62 +20,6 @@ class AiChatPage extends StatefulWidget {
 }
 
 class _AiChatPageState extends State<AiChatPage> {
-  static MoodifyThemeColors get _themeColors =>
-      moodifyColors(MoodifyThemeController.instance.state);
-  static Color get bgColor => _themeColors.background;
-  static Color get primaryColor => _themeColors.primary;
-  static Color get deepGreen => _themeColors.text;
-  static Color get textColor => _themeColors.text;
-  static Color get subTextColor => _themeColors.subText;
-  static Color get lineColor => _themeColors.line;
-  static Color get cardColor => _themeColors.card;
-  static Color get softGreen => _themeColors.soft;
-
-  bool get _isDark => MoodifyThemeController.instance.state.isDark;
-
-  Color get _heroEndColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.14), softGreen)
-      : Color(0xFFF0F6ED);
-
-  Color get _chatBotBubbleColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.08), cardColor)
-      : cardColor.withOpacity(0.96);
-
-  Color get _userBubbleColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.18), backgroundAccent)
-      : Color(0xFFF1F6EB);
-
-  Color get _inputSurfaceColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.06), _themeColors.background2)
-      : Color(0xFFF7F8F3);
-
-  Color get _chipSurfaceColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.08), cardColor)
-      : cardColor.withOpacity(0.88);
-
-  Color get _actionSurfaceColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.10), cardColor)
-      : Color(0xFFFAF6EF);
-
-  Color get _recommendSurfaceColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.08), softGreen)
-      : Color(0xFFF2F7F0);
-
-  Color get _botAvatarEndColor => _isDark
-      ? Color.alphaBlend(primaryColor.withOpacity(0.10), softGreen)
-      : Color(0xFFF0F5EE);
-
-  Color get _botFaceColor => _isDark ? primaryColor.withOpacity(0.52) : Color(0xFF43755A);
-
-  Color get backgroundAccent => _themeColors.background2;
-
-  List<Color> get _primaryButtonGradient => _isDark
-      ? [
-          Color.alphaBlend(Colors.white.withOpacity(0.03), primaryColor),
-          primaryColor.withOpacity(0.72),
-        ]
-      : [Color(0xFF679A74), Color(0xFF3F7A55)];
-
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
@@ -85,7 +28,14 @@ class _AiChatPageState extends State<AiChatPage> {
   bool _isLoading = false;
   late List<_ChatMessage> _messages;
 
-  final List<_QuickPrompt> quickMoods = [
+  static const Color bgColor = Color(0xFFFAFBF7);
+  static const Color primaryColor = Color(0xFF4D8B63);
+  static const Color deepGreen = Color(0xFF1F4A34);
+  static const Color textColor = Color(0xFF2A342D);
+  static const Color subTextColor = Color(0xFF7E877F);
+  static const Color cardColor = Color(0xFFFFFEFB);
+
+  final List<_QuickPrompt> quickMoods = const [
     _QuickPrompt('😰', '焦慮', '我今天有點焦慮，腦袋一直停不下來，想慢慢放鬆一下。'),
     _QuickPrompt('😴', '疲憊', '我今天有點累，也有點煩，想找一些能讓我慢慢放鬆的音樂。'),
     _QuickPrompt('😔', '難過', '我今天心情有點低落，不太想說很多話，但想有人陪我一下。'),
@@ -93,7 +43,7 @@ class _AiChatPageState extends State<AiChatPage> {
     _QuickPrompt('🌿', '想被療癒', '我想要被溫柔陪伴，讓心情慢慢平靜下來。'),
   ];
 
-  final List<_PromptSuggestion> composerPrompts = [
+  final List<_PromptSuggestion> composerPrompts = const [
     _PromptSuggestion(
       icon: Icons.favorite_outline_rounded,
       title: '陪我整理心情',
@@ -134,7 +84,7 @@ class _AiChatPageState extends State<AiChatPage> {
         isUser: false,
         text: '嗨，我在這裡陪你。\n今天有什麼想聊的嗎？我可以陪你整理情緒，也可以幫你找適合現在心情的音樂。',
         time: DateTime.now(),
-        actions: ['3 分鐘呼吸', '安靜鋼琴'],
+        actions: const ['3 分鐘呼吸', '安靜鋼琴'],
         featured: _RecommendationPack.defaultPack().featured,
       ),
     ];
@@ -213,7 +163,7 @@ class _AiChatPageState extends State<AiChatPage> {
           isUser: false,
           text: '新的對話開始了。\n你可以直接告訴我現在的心情，我會用對話的方式陪你慢慢整理。',
           time: DateTime.now(),
-          actions: ['呼吸一下', '柔和音樂'],
+          actions: const ['呼吸一下', '柔和音樂'],
           featured: _RecommendationPack.defaultPack().featured,
         ),
       ];
@@ -243,7 +193,7 @@ class _AiChatPageState extends State<AiChatPage> {
         keywords.any((k) => lower.contains(k));
 
     if (hasAny(['專心', '分心', 'focus', 'study', '工作', '學習'])) {
-      return _RecommendationPack(
+      return const _RecommendationPack(
         actions: ['番茄鐘 25 分鐘', '專注鋼琴'],
         featured: _FeaturedRecommendation(
           title: '穩穩專注下來',
@@ -257,7 +207,7 @@ class _AiChatPageState extends State<AiChatPage> {
     }
 
     if (hasAny(['睡', '累', '疲憊', '休息', '晚安'])) {
-      return _RecommendationPack(
+      return const _RecommendationPack(
         actions: ['睡前放鬆', '晚安白噪音'],
         featured: _FeaturedRecommendation(
           title: '慢慢放鬆入夜',
@@ -271,7 +221,7 @@ class _AiChatPageState extends State<AiChatPage> {
     }
 
     if (hasAny(['焦慮', '煩', '緊張', '不安', 'anx'])) {
-      return _RecommendationPack(
+      return const _RecommendationPack(
         actions: ['3 分鐘呼吸', '安靜鋼琴'],
         featured: _FeaturedRecommendation(
           title: '慢慢沉靜下來',
@@ -285,7 +235,7 @@ class _AiChatPageState extends State<AiChatPage> {
     }
 
     if (hasAny(['難過', '低落', '傷心', '哭'])) {
-      return _RecommendationPack(
+      return const _RecommendationPack(
         actions: ['溫柔陪伴', '療癒木吉他'],
         featured: _FeaturedRecommendation(
           title: '讓情緒被接住',
@@ -305,7 +255,7 @@ class _AiChatPageState extends State<AiChatPage> {
     final lower = title.toLowerCase();
 
     if (lower.contains('開心') || lower.contains('快樂') || lower.contains('輕快')) {
-      return Mood(
+      return const Mood(
         title: '開心',
         emoji: '😊',
         keyword: 'upbeat',
@@ -317,7 +267,7 @@ class _AiChatPageState extends State<AiChatPage> {
         lower.contains('溫柔') ||
         lower.contains('木吉他') ||
         lower.contains('陪伴')) {
-      return Mood(
+      return const Mood(
         title: '難過',
         emoji: '😔',
         keyword: 'soft',
@@ -330,7 +280,7 @@ class _AiChatPageState extends State<AiChatPage> {
         lower.contains('安靜') ||
         lower.contains('平靜') ||
         lower.contains('鋼琴')) {
-      return Mood(
+      return const Mood(
         title: '焦慮',
         emoji: '😰',
         keyword: 'calm',
@@ -342,7 +292,7 @@ class _AiChatPageState extends State<AiChatPage> {
         lower.contains('晚安') ||
         lower.contains('白噪音') ||
         lower.contains('放鬆')) {
-      return Mood(
+      return const Mood(
         title: '疲憊',
         emoji: '😴',
         keyword: 'sleep',
@@ -355,7 +305,7 @@ class _AiChatPageState extends State<AiChatPage> {
         lower.contains('focus') ||
         lower.contains('工作') ||
         lower.contains('讀書')) {
-      return Mood(
+      return const Mood(
         title: '想專心',
         emoji: '🎧',
         keyword: 'focus',
@@ -363,7 +313,7 @@ class _AiChatPageState extends State<AiChatPage> {
       );
     }
 
-    return Mood(
+    return const Mood(
       title: '療癒',
       emoji: '🌿',
       keyword: 'healing',
@@ -383,7 +333,7 @@ class _AiChatPageState extends State<AiChatPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => RecommendPage(
+          builder: (_) => const RecommendPage(
             mood: Mood(
               title: '安靜鋼琴',
               emoji: '🎹',
@@ -400,7 +350,7 @@ class _AiChatPageState extends State<AiChatPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => RecommendPage(
+          builder: (_) => const RecommendPage(
             mood: Mood(
               title: '晚安白噪音',
               emoji: '🌙',
@@ -416,7 +366,7 @@ class _AiChatPageState extends State<AiChatPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => RecommendPage(
+        builder: (_) => const RecommendPage(
           mood: Mood(
             title: '療癒',
             emoji: '🌿',
@@ -444,7 +394,7 @@ class _AiChatPageState extends State<AiChatPage> {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent + 220,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     });
@@ -452,13 +402,12 @@ class _AiChatPageState extends State<AiChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColors = moodifyColors(MoodifyThemeController.instance.state);
     return Scaffold(
-      backgroundColor: themeColors.background,
+      backgroundColor: bgColor,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [themeColors.background, themeColors.background2, themeColors.card],
+            colors: [Color(0xFFFFFEFB), Color(0xFFFAFBF7), Color(0xFFFFFFFF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -469,17 +418,17 @@ class _AiChatPageState extends State<AiChatPage> {
               Expanded(
                 child: ListView(
                   controller: _scrollController,
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
                   children: [
                     _buildHeader(),
-                    SizedBox(height: 22),
+                    const SizedBox(height: 22),
                     _buildHeroCard(),
-                    SizedBox(height: 18),
+                    const SizedBox(height: 18),
                     _buildQuickPrompts(),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     ..._buildChatWidgets(),
                     if (_isLoading) ...[
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       _buildTypingBubble(),
                     ],
                   ],
@@ -490,7 +439,7 @@ class _AiChatPageState extends State<AiChatPage> {
           ),
         ),
       ),
-      bottomNavigationBar: MoodifyBottomNavBar(currentTab: MoodifyTab.ai),
+      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.ai),
     );
   }
 
@@ -499,7 +448,7 @@ class _AiChatPageState extends State<AiChatPage> {
 
     for (final message in _messages) {
       widgets.add(_buildMessageRow(message));
-      widgets.add(SizedBox(height: 12));
+      widgets.add(const SizedBox(height: 12));
     }
 
     return widgets;
@@ -509,7 +458,7 @@ class _AiChatPageState extends State<AiChatPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
+        const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -541,31 +490,31 @@ class _AiChatPageState extends State<AiChatPage> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: cardColor.withOpacity(0.95),
+                color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _softShadow(opacity: 0.07, blur: 20, y: 8),
-                border: Border.all(color: lineColor, width: 1.2),
+                border: Border.all(color: Colors.white, width: 1.2),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.music_note_rounded,
                 color: primaryColor,
                 size: 30,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: _resetConversation,
               child: Container(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.95),
+                  color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: lineColor),
+                  border: Border.all(color: const Color(0xFFE8E7DE)),
                 ),
-                child: Text(
+                child: const Text(
                   '重置',
                   style: TextStyle(
                     color: subTextColor,
@@ -583,15 +532,15 @@ class _AiChatPageState extends State<AiChatPage> {
 
   Widget _buildHeroCard() {
     return Container(
-      padding: EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        gradient: LinearGradient(
-          colors: [cardColor, _heroEndColor],
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFF0F6ED)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: lineColor, width: 1.2),
+        border: Border.all(color: Colors.white, width: 1.2),
         boxShadow: _softShadow(opacity: 0.08, blur: 24, y: 10),
       ),
       child: Stack(
@@ -608,14 +557,14 @@ class _AiChatPageState extends State<AiChatPage> {
           Row(
             children: [
               _buildBotAvatar(96),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Text(
+                        const Text(
                           '在線陪伴中',
                           style: TextStyle(
                             fontSize: 20,
@@ -623,19 +572,19 @@ class _AiChatPageState extends State<AiChatPage> {
                             color: deepGreen,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Container(
                           width: 10,
                           height: 10,
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.82),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF87B67A),
                             shape: BoxShape.circle,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
-                    Text(
+                    const SizedBox(height: 10),
+                    const Text(
                       '有什麼想聊的嗎？\n我會一直在這裡陪著你。',
                       style: TextStyle(
                         fontSize: 16,
@@ -644,22 +593,22 @@ class _AiChatPageState extends State<AiChatPage> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 14),
+                    const SizedBox(height: 14),
                     GestureDetector(
                       onTap: _startConversation,
                       child: Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: _primaryButtonGradient,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF679A74), Color(0xFF3F7A55)],
                           ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: _softShadow(opacity: 0.12, blur: 16, y: 8),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
@@ -700,22 +649,22 @@ class _AiChatPageState extends State<AiChatPage> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: quickMoods.length,
-        separatorBuilder: (_, __) => SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final item = quickMoods[index];
           return GestureDetector(
             onTap: () => _sendMessage(item.text),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: _chipSurfaceColor,
+                color: Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: _isDark ? primaryColor.withOpacity(0.28) : lineColor, width: 1),
+                border: Border.all(color: const Color(0xFFE7E7DF), width: 1),
               ),
               child: Center(
                 child: Text(
                   '${item.emoji} ${item.title}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: textColor,
@@ -740,17 +689,17 @@ class _AiChatPageState extends State<AiChatPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 18,
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: _userBubbleColor,
+                    color: const Color(0xFFF1F6EB),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
                     message.text,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       height: 1.55,
                       color: textColor,
@@ -758,10 +707,10 @@ class _AiChatPageState extends State<AiChatPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   _formatTime(message.time),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: subTextColor,
                     fontWeight: FontWeight.w600,
@@ -770,7 +719,7 @@ class _AiChatPageState extends State<AiChatPage> {
               ],
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           _buildUserCircle(),
         ],
       );
@@ -783,17 +732,17 @@ class _AiChatPageState extends State<AiChatPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildBotAvatar(46),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Flexible(
               child: Container(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: _isDark ? Color.alphaBlend(primaryColor.withOpacity(0.05), cardColor.withOpacity(0.98)) : cardColor.withOpacity(0.96),
+                  color: Colors.white.withOpacity(0.96),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: lineColor, width: 1.1),
+                  border: Border.all(color: Colors.white, width: 1.1),
                   boxShadow: _softShadow(opacity: 0.045, blur: 12, y: 5),
                 ),
                 child: Column(
@@ -801,17 +750,17 @@ class _AiChatPageState extends State<AiChatPage> {
                   children: [
                     Text(
                       message.text,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         height: 1.65,
                         color: textColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       _formatTime(message.time),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: subTextColor,
                         fontWeight: FontWeight.w600,
@@ -824,9 +773,9 @@ class _AiChatPageState extends State<AiChatPage> {
           ],
         ),
         if (message.actions.isNotEmpty) ...[
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
-            padding: EdgeInsets.only(left: 56),
+            padding: const EdgeInsets.only(left: 56),
             child: Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -835,9 +784,9 @@ class _AiChatPageState extends State<AiChatPage> {
           ),
         ],
         if (message.featured != null) ...[
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           Padding(
-            padding: EdgeInsets.only(left: 0),
+            padding: const EdgeInsets.only(left: 0),
             child: _buildRecommendationCard(message.featured!),
           ),
         ],
@@ -850,16 +799,16 @@ class _AiChatPageState extends State<AiChatPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildBotAvatar(46),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
-            color: _chatBotBubbleColor,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: lineColor, width: 1.1),
+            border: Border.all(color: Colors.white, width: 1.1),
             boxShadow: _softShadow(opacity: 0.04, blur: 12, y: 5),
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               _Dot(),
@@ -887,27 +836,27 @@ class _AiChatPageState extends State<AiChatPage> {
       onTap: () => _handleActionTap(title),
       borderRadius: BorderRadius.circular(999),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: _actionSurfaceColor,
+          color: const Color(0xFFFAF6EF),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: _isDark ? primaryColor.withOpacity(0.22) : Color(0xFFF0E8DB)),
+          border: Border.all(color: const Color(0xFFF0E8DB)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: primaryColor, size: 22),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: deepGreen,
               ),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.play_arrow_rounded, color: primaryColor, size: 20),
+            const SizedBox(width: 8),
+            const Icon(Icons.play_arrow_rounded, color: primaryColor, size: 20),
           ],
         ),
       ),
@@ -920,21 +869,21 @@ class _AiChatPageState extends State<AiChatPage> {
       borderRadius: BorderRadius.circular(28),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            colors: [cardColor, _recommendSurfaceColor],
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFFFFF), Color(0xFFF2F7F0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: lineColor, width: 1.2),
+          border: Border.all(color: Colors.white, width: 1.2),
           boxShadow: _softShadow(opacity: 0.06, blur: 16, y: 6),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
                 Text(
                   '為你推薦',
@@ -947,12 +896,12 @@ class _AiChatPageState extends State<AiChatPage> {
                 SizedBox(width: 8),
                 Icon(
                   Icons.auto_awesome_rounded,
-                  color: primaryColor.withOpacity(0.72),
+                  color: Color(0xFF9ABE8D),
                   size: 18,
                 ),
               ],
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -962,7 +911,7 @@ class _AiChatPageState extends State<AiChatPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     gradient: LinearGradient(
-                      colors: _previewGradient(item.accent),
+                      colors: [item.accent.withOpacity(0.95), Colors.white],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -979,10 +928,10 @@ class _AiChatPageState extends State<AiChatPage> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: _isDark ? backgroundAccent.withOpacity(0.92) : cardColor.withOpacity(0.95),
+                          color: Colors.white.withOpacity(0.95),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.play_arrow_rounded,
                           color: primaryColor,
                           size: 30,
@@ -991,7 +940,7 @@ class _AiChatPageState extends State<AiChatPage> {
                     ],
                   ),
                 ),
-                SizedBox(width: 14),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1000,25 +949,25 @@ class _AiChatPageState extends State<AiChatPage> {
                         item.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                           color: deepGreen,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         item.description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           height: 1.55,
                           color: subTextColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 14),
+                      const SizedBox(height: 14),
                       Wrap(
                         spacing: 14,
                         runSpacing: 8,
@@ -1053,10 +1002,10 @@ class _AiChatPageState extends State<AiChatPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 18, color: primaryColor),
-        SizedBox(width: 4),
+        const SizedBox(width: 4),
         Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             color: subTextColor,
             fontWeight: FontWeight.w700,
@@ -1066,30 +1015,19 @@ class _AiChatPageState extends State<AiChatPage> {
     );
   }
 
-  List<Color> _previewGradient(Color accent) {
-    if (_isDark) {
-      return [
-        Color.alphaBlend(accent.withOpacity(0.22), cardColor),
-        Color.alphaBlend(primaryColor.withOpacity(0.06), backgroundAccent),
-      ];
-    }
-    return [accent.withOpacity(0.95), Colors.white];
-  }
-
-
   Widget _buildComposer() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, 14),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
       decoration: BoxDecoration(
-        color: _isDark ? Color.alphaBlend(primaryColor.withOpacity(0.05), cardColor.withOpacity(0.98)) : cardColor.withOpacity(0.96),
+        color: Colors.white.withOpacity(0.96),
         border: Border(
-          top: BorderSide(color: _isDark ? lineColor.withOpacity(0.75) : Color(0xFFEAE8DF).withOpacity(0.9)),
+          top: BorderSide(color: const Color(0xFFEAE8DF).withOpacity(0.9)),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
             blurRadius: 18,
-            offset: Offset(0, -6),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -1098,19 +1036,19 @@ class _AiChatPageState extends State<AiChatPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildComposerQuickPrompts(),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _inputSurfaceColor,
+                    color: const Color(0xFFF7F8F3),
                     borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: lineColor),
+                    border: Border.all(color: const Color(0xFFE8E7DE)),
                   ),
                   child: TextField(
                     controller: _controller,
@@ -1118,15 +1056,15 @@ class _AiChatPageState extends State<AiChatPage> {
                     minLines: 1,
                     maxLines: 4,
                     textInputAction: TextInputAction.newline,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: '告訴我你現在的心情...',
                       hintStyle: TextStyle(
-                        color: _isDark ? subTextColor.withOpacity(0.82) : Color(0xFFA1A69F),
+                        color: Color(0xFFA1A69F),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                       height: 1.45,
                       color: textColor,
@@ -1135,7 +1073,7 @@ class _AiChatPageState extends State<AiChatPage> {
                   ),
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               GestureDetector(
                 onTap: _isLoading ? null : () => _sendMessage(),
                 child: Container(
@@ -1144,8 +1082,8 @@ class _AiChatPageState extends State<AiChatPage> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: _isLoading
-                          ? [primaryColor.withOpacity(0.38), primaryColor.withOpacity(0.38)]
-                          : _primaryButtonGradient,
+                          ? [const Color(0xFFB6D1BF), const Color(0xFFB6D1BF)]
+                          : [const Color(0xFF679A74), const Color(0xFF3F7A55)],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: _softShadow(opacity: 0.09, blur: 16, y: 6),
@@ -1171,7 +1109,7 @@ class _AiChatPageState extends State<AiChatPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 4, right: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
           child: Row(
             children: [
               Icon(
@@ -1179,8 +1117,8 @@ class _AiChatPageState extends State<AiChatPage> {
                 size: 16,
                 color: primaryColor.withOpacity(0.85),
               ),
-              SizedBox(width: 6),
-              Text(
+              const SizedBox(width: 6),
+              const Text(
                 '不知道說什麼？可以點一句試試',
                 style: TextStyle(
                   fontSize: 13,
@@ -1195,29 +1133,29 @@ class _AiChatPageState extends State<AiChatPage> {
           height: 42,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             itemCount: composerPrompts.length,
-            separatorBuilder: (_, __) => SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final item = composerPrompts[index];
               return InkWell(
                 onTap: () => _usePromptSuggestion(item.text),
                 borderRadius: BorderRadius.circular(999),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 13),
+                  padding: const EdgeInsets.symmetric(horizontal: 13),
                   decoration: BoxDecoration(
-                    color: _chipSurfaceColor,
+                    color: const Color(0xFFF7FBF5),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: _isDark ? primaryColor.withOpacity(0.22) : Color(0xFFDCEBDD)),
+                    border: Border.all(color: const Color(0xFFDCEBDD)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(item.icon, size: 17, color: primaryColor),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Text(
                         item.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                           color: deepGreen,
@@ -1240,8 +1178,8 @@ class _AiChatPageState extends State<AiChatPage> {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [cardColor, _botAvatarEndColor],
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFEFB), Color(0xFFF0F5EE)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1254,7 +1192,7 @@ class _AiChatPageState extends State<AiChatPage> {
             top: size * 0.07,
             child: Icon(
               Icons.energy_savings_leaf_rounded,
-              color: primaryColor.withOpacity(0.72),
+              color: const Color(0xFF92B083),
               size: size * 0.22,
             ),
           ),
@@ -1262,7 +1200,7 @@ class _AiChatPageState extends State<AiChatPage> {
             width: size * 0.62,
             height: size * 0.52,
             decoration: BoxDecoration(
-              color: _botFaceColor,
+              color: const Color(0xFF43755A),
               borderRadius: BorderRadius.circular(size * 0.24),
             ),
             child: Center(
@@ -1272,7 +1210,7 @@ class _AiChatPageState extends State<AiChatPage> {
                   Container(
                     width: size * 0.07,
                     height: size * 0.07,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
@@ -1297,11 +1235,11 @@ class _AiChatPageState extends State<AiChatPage> {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.95),
+        color: Colors.white.withOpacity(0.95),
         shape: BoxShape.circle,
-        border: Border.all(color: lineColor),
+        border: Border.all(color: const Color(0xFFE8E7DE)),
       ),
-      child: Icon(Icons.person_outline_rounded, color: _isDark ? subTextColor : Color(0xFF8D8D85)),
+      child: const Icon(Icons.person_outline_rounded, color: Color(0xFF8D8D85)),
     );
   }
 
@@ -1320,7 +1258,7 @@ class _AiChatPageState extends State<AiChatPage> {
           BoxShadow(
             color: primaryColor.withOpacity(0.07),
             blurRadius: 22,
-            offset: Offset(0, -6),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -1334,7 +1272,7 @@ class _AiChatPageState extends State<AiChatPage> {
               onTap: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => HomePage()),
+                  MaterialPageRoute(builder: (_) => const HomePage()),
                   (_) => false,
                 );
               },
@@ -1394,21 +1332,21 @@ class _AiChatPageState extends State<AiChatPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? primaryColor : Color(0xFFB0B4AE),
+              color: isSelected ? primaryColor : const Color(0xFFB0B4AE),
               size: 26,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                color: isSelected ? primaryColor : Color(0xFF9CA39C),
+                color: isSelected ? primaryColor : const Color(0xFF9CA39C),
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             AnimatedContainer(
-              duration: Duration(milliseconds: 180),
+              duration: const Duration(milliseconds: 180),
               width: isSelected ? 28 : 0,
               height: 3,
               decoration: BoxDecoration(
@@ -1434,7 +1372,7 @@ class _AiChatPageState extends State<AiChatPage> {
         offset: Offset(0, y),
       ),
       BoxShadow(
-        color: Colors.black.withOpacity(_isDark ? opacity * 0.10 : opacity * 0.18),
+        color: Colors.black.withOpacity(opacity * 0.18),
         blurRadius: blur * 0.6,
         offset: Offset(0, y * 0.4),
       ),
@@ -1447,7 +1385,7 @@ class _PromptSuggestion {
   final String title;
   final String text;
 
-  _PromptSuggestion({
+  const _PromptSuggestion({
     required this.icon,
     required this.title,
     required this.text,
@@ -1459,7 +1397,7 @@ class _QuickPrompt {
   final String title;
   final String text;
 
-  _QuickPrompt(this.emoji, this.title, this.text);
+  const _QuickPrompt(this.emoji, this.title, this.text);
 }
 
 class _ChatMessage {
@@ -1469,7 +1407,7 @@ class _ChatMessage {
   final List<String> actions;
   final _FeaturedRecommendation? featured;
 
-  _ChatMessage({
+  const _ChatMessage({
     required this.isUser,
     required this.text,
     required this.time,
@@ -1482,7 +1420,7 @@ class _RecommendationPack {
   final List<String> actions;
   final _FeaturedRecommendation featured;
 
-  _RecommendationPack({required this.actions, required this.featured});
+  const _RecommendationPack({required this.actions, required this.featured});
 
   factory _RecommendationPack.fromAiResult(AiChatResult result) {
     IconData icon;
@@ -1493,37 +1431,37 @@ class _RecommendationPack {
     switch (result.moodKey) {
       case 'upbeat':
         icon = Icons.wb_sunny_rounded;
-        accent = Color(0xFFFFF3D8);
+        accent = const Color(0xFFFFF3D8);
         itemCount = '隨機歌曲';
         duration = '輕快';
         break;
       case 'soft':
         icon = Icons.favorite_outline_rounded;
-        accent = Color(0xFFF9F0F2);
+        accent = const Color(0xFFF9F0F2);
         itemCount = '相似心情';
         duration = '溫柔';
         break;
       case 'calm':
         icon = Icons.spa_rounded;
-        accent = Color(0xFFEAF5EB);
+        accent = const Color(0xFFEAF5EB);
         itemCount = '放鬆歌曲';
         duration = '平靜';
         break;
       case 'sleep':
         icon = Icons.nightlight_round;
-        accent = Color(0xFFF2EEFF);
+        accent = const Color(0xFFF2EEFF);
         itemCount = '睡前歌曲';
         duration = '慢節奏';
         break;
       case 'focus':
         icon = Icons.piano_rounded;
-        accent = Color(0xFFEDE9FF);
+        accent = const Color(0xFFEDE9FF);
         itemCount = '專注歌曲';
         duration = '穩定';
         break;
       default:
         icon = Icons.energy_savings_leaf_rounded;
-        accent = Color(0xFFEAF5EB);
+        accent = const Color(0xFFEAF5EB);
         itemCount = '療癒歌曲';
         duration = '舒服';
         break;
@@ -1543,7 +1481,7 @@ class _RecommendationPack {
   }
 
   factory _RecommendationPack.defaultPack() {
-    return _RecommendationPack(
+    return const _RecommendationPack(
       actions: ['3 分鐘呼吸', '安靜鋼琴'],
       featured: _FeaturedRecommendation(
         title: '慢慢沉靜下來',
@@ -1565,7 +1503,7 @@ class _FeaturedRecommendation {
   final IconData icon;
   final Color accent;
 
-  _FeaturedRecommendation({
+  const _FeaturedRecommendation({
     required this.title,
     required this.description,
     required this.itemCount,
@@ -1576,7 +1514,7 @@ class _FeaturedRecommendation {
 }
 
 class _Dot extends StatelessWidget {
-  _Dot();
+  const _Dot();
 
   @override
   Widget build(BuildContext context) {
@@ -1584,7 +1522,7 @@ class _Dot extends StatelessWidget {
       width: 8,
       height: 8,
       decoration: BoxDecoration(
-        color: moodifyColors(MoodifyThemeController.instance.state).subText.withOpacity(0.72),
+        color: const Color(0xFF97A498).withOpacity(0.75),
         shape: BoxShape.circle,
       ),
     );
