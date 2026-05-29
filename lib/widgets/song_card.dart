@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../models/song.dart';
+import '../pages/immersive_player_page.dart';
 import '../services/favorite_service.dart';
 import '../services/firebase_favorite_service.dart';
 import '../services/youtube_search_service.dart';
@@ -22,6 +23,7 @@ class SongCard extends StatefulWidget {
     this.moodEmoji,
     this.moodColor,
   });
+
   @override
   State<SongCard> createState() => _SongCardState();
 }
@@ -36,92 +38,72 @@ class _SongCardState extends State<SongCard> {
   bool _isFavorite = false;
   bool _isPlaying = false;
 
+  Color get _moodColor => Color(widget.moodColor ?? widget.song.moodColor);
+  String get _moodTitle => widget.moodTitle ?? widget.song.moodTitle;
+  String get _moodEmoji => widget.moodEmoji ?? widget.song.moodEmoji;
+
   @override
   void initState() {
     super.initState();
-
     _audioPlayer.onPlayerComplete.listen((event) {
       if (!mounted) return;
-
-      setState(() {
-        _isPlaying = false;
-      });
+      setState(() => _isPlaying = false);
     });
   }
 
   Future<void> _togglePlay() async {
     if (widget.song.previewUrl.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('這首歌沒有提供預覽音檔'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showSnackBar('這首歌沒有提供預覽音檔');
       return;
     }
 
     if (_isPlaying) {
       await _audioPlayer.stop();
-
       if (!mounted) return;
-      setState(() {
-        _isPlaying = false;
-      });
+      setState(() => _isPlaying = false);
     } else {
       await _audioPlayer.stop();
       await _audioPlayer.play(UrlSource(widget.song.previewUrl));
-
       if (!mounted) return;
-      setState(() {
-        _isPlaying = true;
-      });
+      setState(() => _isPlaying = true);
     }
+  }
+
+  Future<void> _openPlayer() async {
+    await _audioPlayer.stop();
+    if (!mounted) return;
+    setState(() => _isPlaying = false);
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ImmersivePlayerPage(
+          song: widget.song,
+          moodTitle: _moodTitle,
+          moodEmoji: _moodEmoji,
+          moodColor: _moodColor.value,
+        ),
+      ),
+    );
   }
 
   Future<void> _openOnYoutube() async {
     try {
       final opened = await _youtubeSearchService.openSongOnYoutube(widget.song);
-
       if (!mounted) return;
-
-      if (!opened) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('無法開啟 YouTube 搜尋'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '正在用 YouTube 搜尋：${widget.song.artistName} - ${widget.song.trackName}',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showSnackBar(opened ? '正在用 YouTube 搜尋這首歌' : '無法開啟 YouTube 搜尋');
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('開啟 YouTube 失敗：$e'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showSnackBar('開啟 YouTube 失敗：$e');
     }
   }
 
   Future<void> _addToFavorite() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-
       final songToSave = widget.song.copyWithMood(
-        moodTitle: widget.moodTitle ?? widget.song.moodTitle,
-        moodEmoji: widget.moodEmoji ?? widget.song.moodEmoji,
-        moodColor: widget.moodColor ?? widget.song.moodColor,
+        moodTitle: _moodTitle,
+        moodEmoji: _moodEmoji,
+        moodColor: _moodColor.value,
       );
 
       if (user == null) {
@@ -131,28 +113,18 @@ class _SongCardState extends State<SongCard> {
       }
 
       if (!mounted) return;
-
-      setState(() {
-        _isFavorite = true;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            user == null
-                ? '已收藏到本機：${songToSave.moodEmoji} ${songToSave.trackName}'
-                : '已收藏到雲端：${songToSave.moodEmoji} ${songToSave.trackName}',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      setState(() => _isFavorite = true);
+      _showSnackBar('已收藏：${songToSave.moodEmoji} ${songToSave.trackName}');
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('收藏失敗：$e'), behavior: SnackBarBehavior.floating),
-      );
+      _showSnackBar('收藏失敗：$e');
     }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
   }
 
   @override
@@ -163,197 +135,130 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isFeatured) {
-      return _buildFeaturedCard();
-    }
-
-    return _buildNormalCard();
+    return widget.isFeatured ? _buildFeaturedCard() : _buildNormalCard();
   }
 
   Widget _buildFeaturedCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.09),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildFeaturedImage(),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSongInfo(
-                  titleSize: 21,
-                  artistSize: 15,
-                  albumSize: 13,
+    return InkWell(
+      onTap: _openPlayer,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: _cardDecoration(radius: 30, blur: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildFeaturedImage(),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSongInfo(
+                    titleSize: 21,
+                    artistSize: 15,
+                    albumSize: 13,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              _buildActionButton(
-                icon: _isFavorite
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
-                isActive: _isFavorite,
-                onTap: _addToFavorite,
-                size: 46,
-              ),
-              const SizedBox(width: 10),
-              _buildActionButton(
-                icon: Icons.smart_display_rounded,
-                isActive: false,
-                onTap: _openOnYoutube,
-                size: 46,
-              ),
-              const SizedBox(width: 10),
-              _buildActionButton(
-                icon: _isPlaying
-                    ? Icons.stop_rounded
-                    : Icons.play_arrow_rounded,
-                isActive: _isPlaying,
-                onTap: _togglePlay,
-                size: 46,
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 12),
+                _buildActionButton(
+                  icon: _isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  isActive: _isFavorite,
+                  onTap: _addToFavorite,
+                  size: 46,
+                ),
+                const SizedBox(width: 10),
+                _buildActionButton(
+                  icon: Icons.fullscreen_rounded,
+                  isActive: false,
+                  onTap: _openPlayer,
+                  size: 46,
+                ),
+                const SizedBox(width: 10),
+                _buildActionButton(
+                  icon: _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                  isActive: _isPlaying,
+                  onTap: _togglePlay,
+                  size: 46,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFeaturedImage() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: Stack(
-        children: [
-          widget.song.artworkUrl.isNotEmpty
-              ? Image.network(
-                  widget.song.artworkUrl.replaceAll('100x100bb', '600x600bb'),
-                  width: double.infinity,
-                  height: 220,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return _buildPlaceholder(
-                      width: double.infinity,
-                      height: 220,
-                      radius: 24,
-                      iconSize: 52,
-                    );
-                  },
-                )
-              : _buildPlaceholder(
-                  width: double.infinity,
-                  height: 220,
-                  radius: 24,
-                  iconSize: 52,
-                ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.28)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+    return Hero(
+      tag: 'artwork-${widget.song.artworkUrl}-${widget.song.trackName}',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            _artworkImage(width: double.infinity, height: 220, radius: 24, iconSize: 52),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.32)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 14,
-            bottom: 14,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.88),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.headphones_rounded,
-                    size: 15,
-                    color: Color(0xFF2E7D62),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    '30 秒預覽',
-                    style: TextStyle(
-                      color: Color(0xFF2E7D62),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
+            Positioned(
+              left: 14,
+              bottom: 14,
+              child: _pill(Icons.headphones_rounded, '沉浸播放'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildNormalCard() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE1F0E8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7D62).withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildArtwork(),
-          const SizedBox(width: 14),
-          Expanded(child: _buildSongInfo()),
-          const SizedBox(width: 8),
-          Column(
-            children: [
-              _buildActionButton(
-                icon: _isFavorite
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
-                isActive: _isFavorite,
-                onTap: _addToFavorite,
-                size: 38,
-              ),
-              const SizedBox(height: 8),
-              _buildActionButton(
-                icon: Icons.smart_display_rounded,
-                isActive: false,
-                onTap: _openOnYoutube,
-                size: 38,
-              ),
-              const SizedBox(height: 8),
-              _buildActionButton(
-                icon: _isPlaying
-                    ? Icons.stop_rounded
-                    : Icons.play_arrow_rounded,
-                isActive: _isPlaying,
-                onTap: _togglePlay,
-                size: 38,
-              ),
-            ],
-          ),
-        ],
+    return InkWell(
+      onTap: _openPlayer,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
+        decoration: _cardDecoration(radius: 24, blur: 16),
+        child: Row(
+          children: [
+            Hero(
+              tag: 'artwork-${widget.song.artworkUrl}-${widget.song.trackName}',
+              child: _buildArtwork(),
+            ),
+            const SizedBox(width: 14),
+            Expanded(child: _buildSongInfo()),
+            const SizedBox(width: 8),
+            Column(
+              children: [
+                _buildActionButton(
+                  icon: _isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  isActive: _isFavorite,
+                  onTap: _addToFavorite,
+                  size: 38,
+                ),
+                const SizedBox(height: 8),
+                _buildActionButton(
+                  icon: _isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                  isActive: _isPlaying,
+                  onTap: _togglePlay,
+                  size: 38,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -361,22 +266,37 @@ class _SongCardState extends State<SongCard> {
   Widget _buildArtwork() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
-      child: widget.song.artworkUrl.isNotEmpty
-          ? Image.network(
-              widget.song.artworkUrl.replaceAll('100x100bb', '300x300bb'),
-              width: 76,
-              height: 76,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return _buildPlaceholder(
-                  width: 76,
-                  height: 76,
-                  radius: 18,
-                  iconSize: 34,
-                );
-              },
-            )
-          : _buildPlaceholder(width: 76, height: 76, radius: 18, iconSize: 34),
+      child: _artworkImage(width: 76, height: 76, radius: 18, iconSize: 34),
+    );
+  }
+
+  Widget _artworkImage({
+    required double width,
+    required double height,
+    required double radius,
+    required double iconSize,
+  }) {
+    final url = widget.song.artworkUrl.replaceAll('100x100bb', '600x600bb');
+    if (url.isEmpty) {
+      return _buildPlaceholder(
+        width: width,
+        height: height,
+        radius: radius,
+        iconSize: iconSize,
+      );
+    }
+
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildPlaceholder(
+        width: width,
+        height: height,
+        radius: radius,
+        iconSize: iconSize,
+      ),
     );
   }
 
@@ -388,6 +308,19 @@ class _SongCardState extends State<SongCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_moodTitle.isNotEmpty) ...[
+          Text(
+            '$_moodEmoji $_moodTitle',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: _moodColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
         Text(
           widget.song.trackName,
           maxLines: widget.isFeatured ? 2 : 1,
@@ -402,11 +335,7 @@ class _SongCardState extends State<SongCard> {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(
-              Icons.person_rounded,
-              size: 14,
-              color: Color(0xFF5F7F73),
-            ),
+            const Icon(Icons.person_rounded, size: 14, color: Color(0xFF5F7F73)),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
@@ -444,6 +373,7 @@ class _SongCardState extends State<SongCard> {
     required double size,
   }) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -465,8 +395,32 @@ class _SongCardState extends State<SongCard> {
         child: Icon(
           icon,
           color: isActive ? Colors.white : const Color(0xFF2E7D62),
-          size: size >= 46 ? 28 : 23,
+          size: size >= 46 ? 27 : 22,
         ),
+      ),
+    );
+  }
+
+  Widget _pill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.90),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 15, color: const Color(0xFF2E7D62)),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Color(0xFF2E7D62),
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -489,6 +443,21 @@ class _SongCardState extends State<SongCard> {
         color: const Color(0xFF2E7D62),
         size: iconSize,
       ),
+    );
+  }
+
+  BoxDecoration _cardDecoration({required double radius, required double blur}) {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: const Color(0xFFE1F0E8)),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFF2E7D62).withOpacity(0.07),
+          blurRadius: blur,
+          offset: const Offset(0, 10),
+        ),
+      ],
     );
   }
 }

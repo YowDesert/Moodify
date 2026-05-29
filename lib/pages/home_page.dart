@@ -8,6 +8,7 @@ import 'favorite_page.dart';
 import 'recommend_page.dart';
 import 'history_page.dart';
 import 'profile_page.dart';
+import 'weekly_report_page.dart';
 import '../services/favorite_service.dart';
 import '../services/mood_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -538,47 +539,55 @@ class _HomePageState extends State<HomePage> {
       children: [
         _buildGroupTitle('快速開始'),
         const SizedBox(height: 10),
-        Row(
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 14,
+          childAspectRatio: 1.5,
           children: [
-            Expanded(
-              child: _buildQuickActionButton(
-                icon: Icons.air_rounded,
-                title: '3 分鐘呼吸',
-                subtitle: '先慢下來',
-                onTap: () => _showBreathingSheet(context),
-              ),
+            _buildQuickActionButton(
+              icon: Icons.air_rounded,
+              title: '3 分鐘呼吸',
+              subtitle: '跟著節奏慢下來',
+              onTap: () => _showBreathingSheet(context),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildQuickActionButton(
-                icon: Icons.chat_bubble_rounded,
-                title: 'AI 陪我聊',
-                subtitle: '說說現在',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AiChatPage()),
-                  );
-                },
-              ),
+            _buildQuickActionButton(
+              icon: Icons.auto_graph_rounded,
+              title: '每週報告',
+              subtitle: '看見心情趨勢',
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const WeeklyReportPage()),
+                );
+                _loadHomeStats();
+              },
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildQuickActionButton(
-                icon: Icons.shuffle_rounded,
-                title: '隨機推薦',
-                subtitle: '換首歌',
-                onTap: () async {
-                  final mood = moods[Random().nextInt(moods.length)];
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RecommendPage(mood: mood),
-                    ),
-                  );
-                  _loadHomeStats();
-                },
-              ),
+            _buildQuickActionButton(
+              icon: Icons.chat_bubble_rounded,
+              title: 'AI 陪我聊',
+              subtitle: '說說現在',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AiChatPage()),
+                );
+              },
+            ),
+            _buildQuickActionButton(
+              icon: Icons.shuffle_rounded,
+              title: '隨機推薦',
+              subtitle: '換一首歌',
+              onTap: () async {
+                final mood = moods[Random().nextInt(moods.length)];
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RecommendPage(mood: mood)),
+                );
+                _loadHomeStats();
+              },
             ),
           ],
         ),

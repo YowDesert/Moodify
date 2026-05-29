@@ -120,7 +120,9 @@ class _HistoryPageState extends State<HistoryPage> {
           },
         ),
       ),
-      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.history),
+      bottomNavigationBar: const MoodifyBottomNavBar(
+        currentTab: MoodifyTab.history,
+      ),
     );
   }
 
@@ -266,6 +268,9 @@ class _HistoryPageState extends State<HistoryPage> {
     final mostCommon = _getMostCommonMood(_recordsInDays(days));
     final average = _averageScore(_recordsInDays(days));
 
+    final rangeTitle = _selectedRange == 0 ? '本週心情趨勢' : '本月心情趨勢';
+    final countTitle = _selectedRange == 0 ? '本週紀錄' : '本月紀錄';
+
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
       decoration: _iosCardDecoration(radius: 28),
@@ -273,11 +278,11 @@ class _HistoryPageState extends State<HistoryPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: Text(
-                  '本週心情趨勢',
-                  style: TextStyle(
+                  rangeTitle,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -285,7 +290,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                 ),
               ),
-              Text(
+              const Text(
                 '心情分數 (0-10)',
                 style: TextStyle(
                   fontSize: 14,
@@ -320,9 +325,11 @@ class _HistoryPageState extends State<HistoryPage> {
                         Positioned(
                           bottom: 0,
                           child: Text(
-                            _weekdayText(day),
+                            _selectedRange == 0
+                                ? _weekdayText(day)
+                                : '${day.month}/${day.day}',
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: subTextColor,
                             ),
@@ -345,7 +352,11 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
             child: Row(
               children: [
-                _summaryTile(Icons.calendar_month_rounded, '本週紀錄', '$total 次'),
+                _summaryTile(
+                  Icons.calendar_month_rounded,
+                  countTitle,
+                  '$total 次',
+                ),
                 _softDivider(),
                 _summaryTile(Icons.wb_sunny_rounded, '最常出現', mostCommon),
                 _softDivider(),
@@ -449,7 +460,10 @@ class _HistoryPageState extends State<HistoryPage> {
             GestureDetector(
               onTap: _showFullCalendarSheet,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.86),
                   borderRadius: BorderRadius.circular(18),
@@ -475,7 +489,10 @@ class _HistoryPageState extends State<HistoryPage> {
             children: [
               IconButton(
                 onPressed: () => setState(() => _weekOffset--),
-                icon: const Icon(Icons.chevron_left_rounded, color: subTextColor),
+                icon: const Icon(
+                  Icons.chevron_left_rounded,
+                  color: subTextColor,
+                ),
               ),
               ...days.map((day) {
                 final selected = _isSameDate(day, _selectedDay);
@@ -536,7 +553,10 @@ class _HistoryPageState extends State<HistoryPage> {
               }),
               IconButton(
                 onPressed: () => setState(() => _weekOffset++),
-                icon: const Icon(Icons.chevron_right_rounded, color: subTextColor),
+                icon: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: subTextColor,
+                ),
               ),
             ],
           ),
@@ -635,103 +655,106 @@ class _HistoryPageState extends State<HistoryPage> {
     return GestureDetector(
       onTap: () => _showRecordDetail(record),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-      decoration: _iosCardDecoration(radius: 22),
-      child: Row(
-        children: [
-          Container(
-            width: 86,
-            height: 70,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(18),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+        decoration: _iosCardDecoration(radius: 22),
+        child: Row(
+          children: [
+            Container(
+              width: 86,
+              height: 70,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Center(
+                child: Text(emoji, style: const TextStyle(fontSize: 34)),
+              ),
             ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 34)),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      _shortDate(date),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: textColor,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      time,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: subTextColor,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.22),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        title,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        _shortDate(date),
                         style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
                           color: textColor,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                Text(
-                  keyword.toString().trim().isEmpty
-                      ? '今天的心情是$title，記得溫柔照顧自己。'
-                      : keyword.toString(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.25,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF424844),
+                      const SizedBox(width: 16),
+                      Text(
+                        time,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: subTextColor,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.22),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 9),
+                  Text(
+                    keyword.toString().trim().isEmpty
+                        ? '今天的心情是$title，記得溫柔照顧自己。'
+                        : keyword.toString(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.25,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF424844),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.chevron_right_rounded,
+                color: primaryColor,
+              ),
             ),
-            child: const Icon(Icons.chevron_right_rounded, color: primaryColor),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -810,11 +833,24 @@ class _HistoryPageState extends State<HistoryPage> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.calendar_month_rounded, color: primaryColor),
+                    const Icon(
+                      Icons.calendar_month_rounded,
+                      color: primaryColor,
+                    ),
                     const SizedBox(width: 10),
-                    Text('${now.month} 月心情日曆', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+                    Text(
+                      '${now.month} 月心情日曆',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: textColor,
+                      ),
+                    ),
                     const Spacer(),
-                    IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -822,10 +858,18 @@ class _HistoryPageState extends State<HistoryPage> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: blankDays + daysInMonth,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisSpacing: 8, crossAxisSpacing: 8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                  ),
                   itemBuilder: (context, index) {
                     if (index < blankDays) return const SizedBox.shrink();
-                    final day = DateTime(now.year, now.month, index - blankDays + 1);
+                    final day = DateTime(
+                      now.year,
+                      now.month,
+                      index - blankDays + 1,
+                    );
                     final record = _firstRecordForDay(day);
                     final selected = _isSameDate(day, _selectedDay);
                     return InkWell(
@@ -836,15 +880,26 @@ class _HistoryPageState extends State<HistoryPage> {
                       borderRadius: BorderRadius.circular(14),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: selected ? primaryColor : softGreen.withOpacity(0.55),
+                          color: selected
+                              ? primaryColor
+                              : softGreen.withOpacity(0.55),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('${day.day}', style: TextStyle(color: selected ? Colors.white : textColor, fontWeight: FontWeight.w900)),
+                            Text(
+                              '${day.day}',
+                              style: TextStyle(
+                                color: selected ? Colors.white : textColor,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                             const SizedBox(height: 2),
-                            Text(record?['emoji'] ?? '—', style: const TextStyle(fontSize: 14)),
+                            Text(
+                              record?['emoji'] ?? '—',
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ],
                         ),
                       ),
@@ -881,27 +936,64 @@ class _HistoryPageState extends State<HistoryPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Text(emoji, style: const TextStyle(fontSize: 42)),
-                const SizedBox(width: 14),
-                Expanded(child: Text(title.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textColor))),
-              ]),
+              Row(
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 42)),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      title.toString(),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              Text('$date  $time', style: const TextStyle(fontSize: 15, color: subTextColor, fontWeight: FontWeight.w700)),
+              Text(
+                '$date  $time',
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: subTextColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 12),
-              Text(keyword.toString().trim().isEmpty ? '今天的心情是$title，記得溫柔照顧自己。' : keyword.toString(), style: const TextStyle(fontSize: 17, height: 1.5, color: textColor, fontWeight: FontWeight.w600)),
+              Text(
+                keyword.toString().trim().isEmpty
+                    ? '今天的心情是$title，記得溫柔照顧自己。'
+                    : keyword.toString(),
+                style: const TextStyle(
+                  fontSize: 17,
+                  height: 1.5,
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                     _deleteRecord(record);
                   },
                   icon: const Icon(Icons.delete_outline_rounded),
-                  label: const Text('刪除這筆紀錄', style: TextStyle(fontWeight: FontWeight.w900)),
+                  label: const Text(
+                    '刪除這筆紀錄',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
                 ),
               ),
             ],
@@ -914,7 +1006,9 @@ class _HistoryPageState extends State<HistoryPage> {
   List<DateTime> _weekDays() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final monday = today.subtract(Duration(days: today.weekday - 1)).add(Duration(days: _weekOffset * 7));
+    final monday = today
+        .subtract(Duration(days: today.weekday - 1))
+        .add(Duration(days: _weekOffset * 7));
     return List.generate(7, (index) => monday.add(Duration(days: index)));
   }
 

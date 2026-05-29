@@ -24,6 +24,7 @@ class MoodifyApp extends StatelessWidget {
       title: 'Moodify',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'Huninn',
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7BC6A4)),
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF3FBF6),

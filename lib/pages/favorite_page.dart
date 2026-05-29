@@ -11,6 +11,7 @@ import 'ai_chat_page.dart';
 import 'history_page.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
+import 'immersive_player_page.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -46,7 +47,12 @@ class _FavoritePageState extends State<FavoritePage> {
     Mood(title: '焦慮', emoji: '😰', keyword: 'calm', color: Color(0xFFA8DADC)),
     Mood(title: '疲憊', emoji: '😴', keyword: 'sleep', color: Color(0xFFCDB4DB)),
     Mood(title: '想專心', emoji: '🎧', keyword: 'focus', color: Color(0xFFB7E4C7)),
-    Mood(title: '療癒', emoji: '🌿', keyword: 'healing', color: Color(0xFF95D5B2)),
+    Mood(
+      title: '療癒',
+      emoji: '🌿',
+      keyword: 'healing',
+      color: Color(0xFF95D5B2),
+    ),
   ];
 
   @override
@@ -122,6 +128,21 @@ class _FavoritePageState extends State<FavoritePage> {
 
     if (!mounted) return;
     setState(() => _playingPreviewUrl = song.previewUrl);
+  }
+
+  Future<void> _openImmersivePlayer(Song song) async {
+    await _audioPlayer.stop();
+
+    if (!mounted) return;
+
+    setState(() {
+      _playingPreviewUrl = null;
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ImmersivePlayerPage(song: song)),
+    );
   }
 
   List<Song> _getFilteredSongs(List<Song> songs) {
@@ -250,7 +271,9 @@ class _FavoritePageState extends State<FavoritePage> {
           ),
         ),
       ),
-      bottomNavigationBar: const MoodifyBottomNavBar(currentTab: MoodifyTab.favorite),
+      bottomNavigationBar: const MoodifyBottomNavBar(
+        currentTab: MoodifyTab.favorite,
+      ),
     );
   }
 
@@ -463,103 +486,106 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildFeaturedCard(Song song, int count) {
     final isPlaying = _playingPreviewUrl == song.previewUrl;
 
-    return Container(
-      height: 230,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFEFF2F8), Color(0xFFFCEFD9), Color(0xFFF7E6E1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return GestureDetector(
+      onTap: () => _openImmersivePlayer(song),
+      child: Container(
+        height: 230,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFEFF2F8), Color(0xFFFCEFD9), Color(0xFFF7E6E1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: Colors.white, width: 1.4),
+          boxShadow: _softShadow(opacity: 0.08, blur: 22, y: 10),
         ),
-        border: Border.all(color: Colors.white, width: 1.4),
-        boxShadow: _softShadow(opacity: 0.08, blur: 22, y: 10),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: -8,
-            bottom: 10,
-            child: Icon(
-              Icons.spa_rounded,
-              color: primaryColor.withOpacity(0.18),
-              size: 90,
-            ),
-          ),
-          Positioned(
-            right: 12,
-            top: 10,
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              color: Colors.white.withOpacity(0.6),
-              size: 18,
-            ),
-          ),
-          Positioned(
-            right: 6,
-            bottom: 0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
-              child: SizedBox(
-                width: 170,
-                height: 118,
-                child: song.artworkUrl.isNotEmpty
-                    ? Image.network(
-                        song.artworkUrl.replaceAll('100x100bb', '600x600bb'),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            _featuredLandscapePlaceholder(),
-                      )
-                    : _featuredLandscapePlaceholder(),
+        child: Stack(
+          children: [
+            Positioned(
+              left: -8,
+              bottom: 10,
+              child: Icon(
+                Icons.spa_rounded,
+                color: primaryColor.withOpacity(0.18),
+                size: 90,
               ),
             ),
-          ),
-          Positioned(
-            right: 26,
-            bottom: 24,
-            child: GestureDetector(
-              onTap: () => _togglePreview(song),
-              child: Container(
-                width: 74,
-                height: 74,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.93),
-                  shape: BoxShape.circle,
-                  boxShadow: _softShadow(opacity: 0.07, blur: 12, y: 6),
-                ),
-                child: Icon(
-                  isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                  color: primaryColor,
-                  size: 38,
+            Positioned(
+              right: 12,
+              top: 10,
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                color: Colors.white.withOpacity(0.6),
+                size: 18,
+              ),
+            ),
+            Positioned(
+              right: 6,
+              bottom: 0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: SizedBox(
+                  width: 170,
+                  height: 118,
+                  child: song.artworkUrl.isNotEmpty
+                      ? Image.network(
+                          song.artworkUrl.replaceAll('100x100bb', '600x600bb'),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _featuredLandscapePlaceholder(),
+                        )
+                      : _featuredLandscapePlaceholder(),
                 ),
               ),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 22),
-              Text(
-                _featuredTitle([song]),
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: deepGreen,
+            Positioned(
+              right: 26,
+              bottom: 24,
+              child: GestureDetector(
+                onTap: () => _openImmersivePlayer(song),
+                child: Container(
+                  width: 74,
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.93),
+                    shape: BoxShape.circle,
+                    boxShadow: _softShadow(opacity: 0.07, blur: 12, y: 6),
+                  ),
+                  child: Icon(
+                    isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                    color: primaryColor,
+                    size: 38,
+                  ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                _featuredCountText(count),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF5F6B64),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 22),
+                Text(
+                  _featuredTitle([song]),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: deepGreen,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 10),
+                Text(
+                  _featuredCountText(count),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF5F6B64),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -617,91 +643,94 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   Widget _buildFavoriteTile(Song song) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.94),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white, width: 1.1),
-        boxShadow: _softShadow(opacity: 0.045, blur: 14, y: 6),
-      ),
-      child: Row(
-        children: [
-          _buildArtwork(song, size: 92, radius: 18),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => _openImmersivePlayer(song),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.94),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white, width: 1.1),
+          boxShadow: _softShadow(opacity: 0.045, blur: 14, y: 6),
+        ),
+        child: Row(
+          children: [
+            _buildArtwork(song, size: 92, radius: 18),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    song.trackName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: deepGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    song.artistName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: subTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _buildSongDescription(song),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: subTextColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
               children: [
-                Text(
-                  song.trackName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: deepGreen,
+                IconButton(
+                  onPressed: () => _removeSong(song),
+                  icon: const Icon(
+                    Icons.favorite_rounded,
+                    color: primaryColor,
+                    size: 28,
                   ),
+                  splashRadius: 22,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  song.artistName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: subTextColor,
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(
+                    Icons.more_vert_rounded,
+                    color: Color(0xFF738073),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _buildSongDescription(song),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: subTextColor,
-                  ),
+                  onSelected: (value) {
+                    if (value == 'play') {
+                      _openImmersivePlayer(song);
+                    } else if (value == 'remove') {
+                      _removeSong(song);
+                    }
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: 'play', child: Text('播放預覽')),
+                    PopupMenuItem(value: 'remove', child: Text('移除收藏')),
+                  ],
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            children: [
-              IconButton(
-                onPressed: () => _removeSong(song),
-                icon: const Icon(
-                  Icons.favorite_rounded,
-                  color: primaryColor,
-                  size: 28,
-                ),
-                splashRadius: 22,
-              ),
-              PopupMenuButton<String>(
-                padding: EdgeInsets.zero,
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                  color: Color(0xFF738073),
-                ),
-                onSelected: (value) {
-                  if (value == 'play') {
-                    _togglePreview(song);
-                  } else if (value == 'remove') {
-                    _removeSong(song);
-                  }
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'play', child: Text('播放預覽')),
-                  PopupMenuItem(value: 'remove', child: Text('移除收藏')),
-                ],
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -764,71 +793,76 @@ class _FavoritePageState extends State<FavoritePage> {
           final song = displaySongs[index];
           final isPlaying = _playingPreviewUrl == song.previewUrl;
 
-          return Container(
-            width: 270,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
-              gradient: LinearGradient(
-                colors: index.isEven
-                    ? [const Color(0xFFF1F7ED), Colors.white]
-                    : [const Color(0xFFF5F0FF), Colors.white],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          return GestureDetector(
+            onTap: () => _openImmersivePlayer(song),
+            child: Container(
+              width: 270,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                gradient: LinearGradient(
+                  colors: index.isEven
+                      ? [const Color(0xFFF1F7ED), Colors.white]
+                      : [const Color(0xFFF5F0FF), Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                border: Border.all(color: Colors.white, width: 1.1),
+                boxShadow: _softShadow(opacity: 0.04, blur: 12, y: 6),
               ),
-              border: Border.all(color: Colors.white, width: 1.1),
-              boxShadow: _softShadow(opacity: 0.04, blur: 12, y: 6),
-            ),
-            child: Row(
-              children: [
-                _buildArtwork(song, size: 72, radius: 16),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.trackName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: deepGreen,
+              child: Row(
+                children: [
+                  _buildArtwork(song, size: 72, radius: 16),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          song.trackName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: deepGreen,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${song.artistName} · ${song.collectionName.isEmpty ? '1' : '1'} 首歌曲',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: subTextColor,
+                        const SizedBox(height: 6),
+                        Text(
+                          '${song.artistName} · ${song.collectionName.isEmpty ? '1' : '1'} 首歌曲',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: subTextColor,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _togglePreview(song),
-                  child: Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.90),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                      color: primaryColor,
-                      size: 26,
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  GestureDetector(
+                    onTap: () => _openImmersivePlayer(song),
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.90),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isPlaying
+                            ? Icons.stop_rounded
+                            : Icons.play_arrow_rounded,
+                        color: primaryColor,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
